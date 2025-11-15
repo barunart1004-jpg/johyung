@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ArtTest Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{ --bg1:#fff7f1; --bg2:#f7f3ff; --card:#fff; --ink:#0f172a; --muted:#6b7280; --line:#eef2f7; --o1:#FFE6CF; --o2:#FFD9BE; --shadow:0 18px 60px rgba(16,24,40,.10);}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--ink);font-family:"Pretendard",ui-sans-serif,system-ui,"Noto Sans KR",Segoe UI,Roboto,Arial}
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(rgba(255,255,255,.82),rgba(255,255,255,.82)),url("/bg.png") center/cover no-repeat fixed;filter:saturate(1.02)}
+.header{position:sticky; top:0; z-index:10; backdrop-filter:blur(8px); background:rgba(255,255,255,.6); border-bottom:1px solid var(--line)}
+.header .wrap{max-width:1100px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}
+.brand .dot{width:22px;height:22px;border-radius:50%;background:conic-gradient(from 0deg,#FFB98A,#FFE6CF,#E6E2FF,#CFF7EE,#FFB98A)}
+.link{margin-left:auto;color:#111;text-decoration:none;font-weight:900;border:1px solid var(--line);padding:10px 14px;border-radius:12px;background:#fff;box-shadow:0 10px 24px rgba(16,24,40,.06)}
+.wrap-main{max-width:1100px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px;animation:fade .3s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}} h2{margin:0 0 10px}
+.muted{color:var(--muted)} .small{font-size:13px}
+.btn{min-width:140px;background:linear-gradient(90deg,#FFB98A,#FFD9BE);color:#5a3f2f;border:none;padding:12px 14px;border-radius:12px;font-weight:900;cursor:pointer;box-shadow:0 10px 28px rgba(255,185,138,.35)}
+.btn-ghost{min-width:140px;background:#fff;color:#111;border:1px solid var(--line);padding:12px 14px;border-radius:12px;font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(16,24,40,.06)}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px}
+.grid{display:grid;gap:14px} .grid-2{grid-template-columns:1fr 2fr} @media(max-width:1000px){.grid-2{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto}
+.qitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;cursor:pointer}
+.qitem:hover{box-shadow:0 10px 24px rgba(16,24,40,.06)}
+.thumb{width:80px;height:60px;border-radius:8px;background:#f3f4f6;object-fit:cover;border:1px solid var(--line)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.table{border-collapse:collapse;width:100%} .table th,.table td{border:1px solid var(--line);padding:8px;font-size:12px}
+.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(16,24,40,.06)}
+.tab.active{background:linear-gradient(90deg,var(--o1),var(--o2));color:#111;border-color:transparent}
+.section{display:none}.section.active{display:block}
+.center{text-align:center}
+label>span{display:block;font-size:12px;color:#6b7280;margin-top:4px}
+.gate{position:fixed; inset:0; display:grid; place-items:center; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); z-index:9999}
+.gatebox{background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; width:min(380px,90vw); box-shadow:0 18px 44px rgba(16,24,40,.12)}
+.weight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.weight-item{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff}
+.weight-item label{font-size:12px;color:#6b7280}
+.weight-item input{margin-top:4px}
+@media(max-width:900px){.weight-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="gate" class="gate">
+  <div class="gatebox">
+    <h3 style="margin:0 0 10px">관리자 로그인</h3>
+    <input id="pw" type="password" placeholder="비밀번호" />
+    <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" onclick="enterGate()">입장</button></div>
+    <div id="gateMsg" class="small muted" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<header class="header">
+  <div class="wrap">
+    <div class="brand"><div class="dot"></div><span style="font-weight:900">ArtTest Admin</span></div>
+    <a class="link" href="./index.html" target="_blank" rel="noopener">테스트 페이지</a>
+  </div>
+</header>
+
+<main class="wrap-main">
+  <div class="tabs">
+    <div class="tab active" data-tab="t1">결과 보기</div>
+    <div class="tab" data-tab="t2">문항 관리</div>
+    <div class="tab" data-tab="t3">환경설정</div>
+    <div class="tab" id="signin">Google 로그인</div>
+    <div class="tab" id="signout" style="display:none">로그아웃</div>
+  </div>
+
+  <!-- 결과 보기 -->
+  <section id="t1" class="section active card">
+    <h2>Results</h2>
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <input id="res_search" placeholder="검색: 이름/전화/탑3" style="max-width:360px">
+      <div class="row">
+        <label>정렬</label>
+        <select id="res_sort" style="min-width:160px">
+          <option value="time_desc">시간 ↓</option>
+          <option value="time_asc">시간 ↑</option>
+          <option value="name_asc">이름 A→Z</option>
+          <option value="top1_asc">상위1 영역 A→Z</option>
+        </select>
+      </div>
+    </div>
+    <div id="results" class="small muted center">로그인 후 조회됩니다.</div>
+  </section>
+
+  <!-- 문항 관리 -->
+  <section id="t2" class="section card">
+    <h2>문항 관리</h2>
+    <div class="grid grid-2" style="margin-top:12px">
+      <div>
+        <div class="row" style="justify-content:space-between">
+          <input id="qsearch" placeholder="문항 검색 (질문/라벨)" />
+          <div class="row">
+            <button class="btn-ghost" onclick="previewTest()">수험자 미리보기</button>
+            <button class="btn" onclick="addQuestion()">새 문항 추가</button>
+          </div>
+        </div>
+        <div id="qlist" class="list" style="margin-top:10px"></div>
+      </div>
+      <div>
+        <div class="row" style="justify-content:flex-start;gap:12px">
+          <label style="min-width:120px">문항 ID <span>(자동)</span></label><input id="qid" readonly style="max-width:240px" />
+          <label style="min-width:80px">순서</label><input id="order" style="max-width:110px" />
+          <label class="row" style="gap:6px"><input type="checkbox" id="active"/><span>활성화</span></label>
+        </div>
+        <label style="margin-top:8px">문제(질문)</label>
+        <textarea id="prompt" rows="2" placeholder="예: 전시 포스터를 만든다면 어디에 집중할까?"></textarea>
+
+        <!-- 보기 A~D -->
+        <div id="optionsPanel"></div>
+
+        <div class="row" style="margin-top:12px; justify-content:center">
+          <button class="btn" onclick="save()" style="width:220px">저장</button>
+          <button class="btn-ghost" onclick="reload()" style="width:220px">다시 불러오기</button>
+        </div>
+        <div id="msg" class="small muted center" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <p class="small muted center" style="margin-top:10px">※ 시트 편집권한이 있어야 저장됩니다.</p>
+  </section>
+
+  <!-- 설정 -->
+  <section id="t3" class="section card">
+    <h2>환경설정</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div>
+        <label>관리자 비밀번호</label>
+        <input id="cfg_pw" type="text" placeholder="변경할 비밀번호" />
+        <div class="row" style="margin-top:8px"><button class="btn" onclick="savePw()">저장</button></div>
+        <p class="small muted" id="cfg_msg"></p>
+      </div>
+      <div>
+        <p class="small muted">이 비밀번호는 브라우저 로컬에 저장됩니다(간편 보안). 여러 명이 쓰면 각자 브라우저에서 설정하세요.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
+<script>
+const API_KEY   = 'AIzaSyBsTZlRW0JcDURjQY4nK2CRX-oSpxqux_4';
+const CLIENT_ID = '51272397260-bnumg4lmc58udrh5o30kogjq096gmdkp.apps.googleusercontent.com';
+const SHEET_ID  = '14VLQBhDJtduxjCnfr7VEOstZ5ez8-CX3ArXy1OvYCQg';
+const DOMAINS   = ["관찰력","서사력","디테일","구성력","색감각","공간감","도전성","소통력"];
+
+/* Password gate */
+function curPw(){ return localStorage.getItem('admin_pw') || '250824'; }
+function enterGate(){ const ok = document.getElementById('pw').value === curPw(); if(ok){ document.getElementById('gate').style.display='none'; } else { document.getElementById('gateMsg').textContent='비밀번호가 올바르지 않습니다.'; }}
+function savePw(){ const v=document.getElementById('cfg_pw').value.trim(); if(!v){return} localStorage.setItem('admin_pw',v); document.getElementById('cfg_msg').textContent='저장되었습니다. 다음 접속부터 적용됩니다.'; }
+
+/* Tabs */
+document.addEventListener('click',(e)=>{ if(e.target.classList.contains('tab') && e.target.dataset.tab){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t===e.target)); document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active', s.id===e.target.dataset.tab)); } });
+
+/* Auth */
+const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
+const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+let tokenClient;
+window.onload = () => {
+  gapi.load('client', async () => { try{ await gapi.client.init({ apiKey: API_KEY, discoveryDocs: DISCOVERY_DOCS }); }catch(e){} });
+  tokenClient = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPES, callback: (resp)=>{ if(resp && resp.access_token){ onSignedIn(); } } });
+  document.getElementById('signin').onclick = ()=> tokenClient.requestAccessToken({ prompt:'' });
+  document.getElementById('signout').onclick = ()=>{ const t=gapi.client.getToken(); if(t){ google.accounts.oauth2.revoke(t.access_token); gapi.client.setToken(''); } onSignedOut(); };
+};
+
+function onSignedIn(){ document.getElementById('signin').style.display='none'; document.getElementById('signout').style.display='inline-block'; document.getElementById('results').innerHTML='불러오는 중…'; loadResults(); loadQuestions(); }
+function onSignedOut(){ document.getElementById('signin').style.display='inline-block'; document.getElementById('signout').style.display='none'; document.getElementById('results').innerHTML='로그인 후 조회됩니다.'; document.getElementById('qlist').innerHTML=''; document.getElementById('msg').textContent=''; }
+
+/* Sheets helpers (+ GViz fallback) */
+async function readRange(range){
+  try{
+    const r = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId:SHEET_ID, range });
+    return r.result.values || [];
+  }catch(err){
+    const sheet = range.split('!')[0];
+    const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}&tqx=out:json`);
+    const txt = await resp.text(); const s=txt.indexOf('{'), e=txt.lastIndexOf('}'); if(s<0||e<0) throw err;
+    const obj=JSON.parse(txt.slice(s,e+1)); const cols=obj.table.cols.map(c=>c.label);
+    const rows=obj.table.rows.map(r=>r.c.map(c=>c?(c.f??c.v):''));
+    return [cols, ...rows];
+  }
+}
+async function writeRange(range, values){ return gapi.client.sheets.spreadsheets.values.update({ spreadsheetId:SHEET_ID, range, valueInputOption:'RAW', resource:{ values } }); }
+
+/* Results */
+let RES_ROWS=[], RES_IDX={};
+async function loadResults(){
+  try{
+    const rows = await readRange('Form_Responses!A1:Z10000'); const header = rows.shift()||[];
+    RES_IDX = Object.fromEntries(header.map((h,i)=>[h,i])); RES_ROWS = rows;
+    applyResultsFilter();
+  }catch(e){
+    document.getElementById('results').innerHTML = `<div class="muted">불러오지 못했습니다. 로그인 계정 권한 또는 시트 공유(보기)를 확인해주세요.</div>`;
+  }
+}
+function applyResultsFilter(){
+  const q=(document.getElementById('res_search').value||'').toLowerCase();
+  const sort=document.getElementById('res_sort').value;
+  let arr = RES_ROWS.slice();
+  if(q){
+    arr = arr.filter(r=>{
+      const name=r[RES_IDX['child_name']]||'', phone=r[RES_IDX['phone']]||'', top3=r[RES_IDX['top3']]||r[RES_IDX['top3(csv)']]||'';
+      return [name,phone,top3].join(' ').toLowerCase().includes(q);
+    });
+  }
+  const byTime=(a,b)=> (new Date(a[RES_IDX['timestamp']]||0)) - (new Date(b[RES_IDX['timestamp']]||0));
+  const byName=(a,b)=> String(a[RES_IDX['child_name']]||'').localeCompare(String(b[RES_IDX['child_name']]||''));
+  const byTop1=(a,b)=> String((a[RES_IDX['top3']]||'').split(',')[0]).localeCompare(String((b[RES_IDX['top3']]||'').split(',')[0]));
+  if(sort==='time_desc') arr.sort((a,b)=>byTime(b,a));
+  if(sort==='time_asc')  arr.sort(byTime);
+  if(sort==='name_asc')  arr.sort(byName);
+  if(sort==='top1_asc')  arr.sort(byTop1);
+
+  const html = ['<table class="table"><tr><th>시간</th><th>이름</th><th>학년</th><th>연락처</th><th>Top3</th></tr>'];
+  arr.slice(-500).reverse().forEach(r=>{
+    html.push(`<tr>
+      <td>${r[RES_IDX['timestamp']]||''}</td>
+      <td>${r[RES_IDX['child_name']]||''}</td>
+      <td>${r[RES_IDX['grade']]||''}</td>
+      <td>${r[RES_IDX['phone']]||''}</td>
+      <td>${r[RES_IDX['top3']]||r[RES_IDX['top3(csv)']]||''}</td>
+    </tr>`);
+  });
+  html.push('</table>'); document.getElementById('results').innerHTML = html.join('');
+}
+document.getElementById('res_search').oninput=applyResultsFilter;
+document.getElementById('res_sort').onchange=applyResultsFilter;
+
+/* Questions */
+let QUESTIONS=[], HDR={};
+function optionsPanelHTML(){ return ['A','B','C','D'].map(k=>`
+  <div style="border:1px solid var(--line); border-radius:12px; padding:10px; margin-top:10px">
+    <strong>보기 ${k}</strong>
+    <label>라벨</label><input id="${k}_label"/>
+    <label>이미지 URL</label><input id="${k}_image" oninput="updateThumb('${k}')" placeholder="https://..."/>
+    <img id="${k}_thumb" class="thumb" alt="보기 ${k} 이미지" style="margin:6px 0">
+    <div class="small muted" style="margin:4px 0 6px">가중치(0~1, 0.1 단위)</div>
+    <div class="weight-grid" id="${k}_weights_grid"></div>
+  </div>`).join(''); }
+function renderOptionsPanel(){ document.getElementById('optionsPanel').innerHTML = optionsPanelHTML(); }
+function weightGridHTML(k){ return DOMAINS.map(d=>`<div class="weight-item"><label>${d}</label><input type="number" step="0.1" min="0" max="1" id="${k}_w_${d}" value="0"></div>`).join(''); }
+
+async function loadQuestions(){
+  renderOptionsPanel();
+  const rows = await readRange('Questions!A1:P10000'); const header = rows.shift()||[]; HDR = Object.fromEntries(header.map((h,i)=>[h,i]));
+  QUESTIONS = rows.map((r,ri)=>({
+    _row:r, _rowNum:ri+2,
+    id:r[HDR.id], order:+(r[HDR.order]||0),
+    prompt:(r[HDR.prompt]||'').replace(/\$\{[\s\S]*?\}\s*$/,''), // <- 시트에 잘못 들어간 템플릿 문자열 제거
+    A_label:r[HDR.A_label]||'', A_image:r[HDR.A_image]||'', A_weights:r[HDR.A_weights]||'',
+    B_label:r[HDR.B_label]||'', B_image:r[HDR.B_image]||'', B_weights:r[HDR.B_weights]||'',
+    C_label:r[HDR.C_label]||'', C_image:r[HDR.C_image]||'', C_weights:r[HDR.C_weights]||'',
+    D_label:r[HDR.D_label]||'', D_image:r[HDR.D_image]||'', D_weights:r[HDR.D_weights]||'',
+    active:String(r[HDR.active]||'TRUE').toUpperCase()==='TRUE'
+  })).sort((a,b)=>a.order-b.order);
+  renderList(QUESTIONS); bindSearch(); if(QUESTIONS[0]) fill(QUESTIONS[0]);
+}
+function bindSearch(){ document.getElementById('qsearch').oninput=(e)=>{ const q=e.target.value.toLowerCase(); const f=QUESTIONS.filter(x=>(x.prompt||'').toLowerCase().includes(q) || [x.A_label,x.B_label,x.C_label,x.D_label].some(t=>(t||'').toLowerCase().includes(q))); renderList(f); }; }
+function renderList(arr){
+  const el=document.getElementById('qlist'); el.innerHTML='';
+  arr.forEach(q=>{
+    const it=document.createElement('div'); it.className='qitem'; it.onclick=()=>fill(q);
+    const img=q.A_image||q.B_image||q.C_image||q.D_image||''; it.innerHTML = `<img class="thumb" src="${img}" alt="" onerror="this.style.opacity=.2"><div><div><b>${q.order}.</b> ${q.prompt||'(제목 없음)'}</div><div class="small muted">${q.id||''}</div></div>`;
+    el.appendChild(it);
+  });
+}
+function g(id){return document.getElementById(id);}
+function updateThumb(k){ g(k+'_thumb').src = g(k+'_image').value; }
+function setWeightsUI(k, obj){
+  const grid = g(`${k}_weights_grid`); grid.innerHTML = weightGridHTML(k);
+  DOMAINS.forEach(d=>{ g(`${k}_w_${d}`).value = (obj?.[d] ?? 0); });
+}
+function getWeightsJSON(k){
+  const o={}; DOMAINS.forEach(d=>{ const val=parseFloat(g(`${k}_w_${d}`).value||'0'); o[d]=isNaN(val)?0:Math.max(0,Math.min(1,val)); });
+  return JSON.stringify(o);
+}
+function fill(q){
+  g('qid').value=q.id||''; g('order').value=q.order||''; g('active').checked=!!q.active; g('prompt').value=q.prompt||'';
+  ['A','B','C','D'].forEach(k=>{
+    g(`${k}_label`).value=q[`${k}_label`]||''; g(`${k}_image`).value=q[`${k}_image`]||''; updateThumb(k);
+    let obj={}; try{ obj=JSON.parse(q[`${k}_weights`]||'{}'); }catch(e){}
+    setWeightsUI(k, obj);
+  });
+  document.querySelectorAll('.qitem').forEach(n=>n.style.outline=''); 
+}
+async function save(){
+  const id=g('qid').value; const q = QUESTIONS.find(x=>x.id===id); if(!q) return;
+  const row = q._row.slice();
+  row[HDR['order']] = g('order').value; row[HDR['prompt']] = g('prompt').value.replace(/\$\{[\s\S]*?\}\s*$/,''); // 안전
+  row[HDR['active']] = g('active').checked ? 'TRUE':'FALSE';
+  ['A','B','C','D'].forEach(k=>{
+    row[HDR[`${k}_label`]] = g(`${k}_label`).value;
+    row[HDR[`${k}_image`]] = g(`${k}_image`).value;
+    row[HDR[`${k}_weights`]] = getWeightsJSON(k);
+  });
+  await writeRange(`Questions!A${q._rowNum}:P${q._rowNum}`, [row]);
+  g('msg').textContent='저장 완료'; setTimeout(()=>g('msg').textContent='',1500); await loadQuestions();
+}
+async function addQuestion(){
+  const nextOrder=(QUESTIONS[QUESTIONS.length-1]?.order||0)+1; const newId=`q${nextOrder}`;
+  const values=[newId,String(nextOrder),'새 문항을 입력하세요','보기 A','', '{}','보기 B','', '{}','보기 C','', '{}','보기 D','', '{}','TRUE'];
+  const target=QUESTIONS.length+2; await writeRange(`Questions!A${target}:P${target}`,[values]);
+  g('msg').textContent='새 문항 추가됨'; setTimeout(()=>g('msg').textContent='',1500); await loadQuestions();
+}
+function previewTest(){ window.open('./index.html#test','_blank'); }
+</script>
+</body>
+</html>

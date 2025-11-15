@@ -1,0 +1,10 @@
+# netlify.toml
+[build]
+  publish   = "public"           # 정적 파일 폴더
+  functions = "netlify/functions" # 함수 폴더
+
+[functions]
+  node_bundler = "esbuild"
+
+[dev]
+  framework = "#static"

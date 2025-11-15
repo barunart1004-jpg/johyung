@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>바른미술학원 · 미술적성테스트 V2. ADVANCE</title>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+<style>
+:root{
+  /* ADVANCE 다크/네온 */
+  --ink:#E8EEF6; --muted:#90A3B2; --bg:#0B1220;
+  --card:#0F172A; --line:#1F2A44;
+  --accent1:#66E0FF; --accent2:#B4F1CB; --accent3:#E9D5FF;
+  --hot:#FFAA6C; --radius:20px;
+  --shadow:0 18px 60px rgba(0,0,0,.45); --soft:0 12px 26px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;color:var(--ink);font-family:"Pretendard",ui-sans-serif,system-ui,"Noto Sans KR",Segoe UI,Roboto,Arial;background:
+radial-gradient(1200px 420px at 15% -20%, rgba(102,224,255,.12) 0%, transparent 60%),
+radial-gradient(1200px 420px at 85% -20%, rgba(233,213,255,.12) 0%, transparent 60%),
+linear-gradient(180deg,#0B1220 0%, #0A0F1B 100%)}
+a{color:inherit}
+
+.container{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
+.main{width:100%;max-width:1200px;padding:18px;display:flex;flex-direction:column;gap:16px;margin:0 auto}
+.header{width:100%;display:flex;justify-content:center}
+.brand{width:100%;max-width:1200px;margin-top:12px;display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:999px;background:rgba(16,24,40,.6);backdrop-filter:blur(6px);border:1px solid var(--line);box-shadow:var(--soft)}
+.logo{width:28px;height:28px;border-radius:50%;background:conic-gradient(from 0deg,#66E0FF,#B4F1CB,#E9D5FF,#FFAA6C,#66E0FF);animation:spin 9s linear infinite paused}
+.brand:hover .logo{animation-play-state:running}@keyframes spin{to{transform:rotate(360deg)}}
+.brand span{font-weight:900;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.badge{font-size:11px;font-weight:900;padding:4px 8px;border-radius:999px;background:linear-gradient(90deg,#0F172A,#172036);color:#BCE0F6;border:1px solid #2a3b60}
+
+/* 진행바 */
+.sticky{position:sticky;top:0;z-index:10;background:rgba(13,19,35,.82);border:1px solid var(--line);border-radius:16px;box-shadow:var(--soft);padding:8px 10px;display:flex;flex-direction:column;gap:10px}
+.navbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.step{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;cursor:pointer;background:#0F172A;color:#CFE3FF;font-weight:850;border:1px solid var(--line);box-shadow:var(--soft);transition:transform .12s}
+.step:hover{transform:translateY(-1px)}
+.step .num{width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;background:#0C1428;border:1px solid var(--line);font-size:12px}
+.step.active{background:linear-gradient(90deg,rgba(102,224,255,.25),rgba(233,213,255,.25));color:#fff;box-shadow:0 12px 30px rgba(102,224,255,.25)}
+.step.done{background:linear-gradient(90deg,rgba(180,241,203,.18),rgba(102,224,255,.18));border-color:#27406a}
+
+.topprogress{--steps:20;position:relative;height:28px;background:#0F172A;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.topprogress .bar{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#66E0FF,#B4F1CB,#FFAA6C);border-radius:999px;z-index:1;transition:width .35s ease}
+.topprogress::before{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background-image:linear-gradient(to right, rgba(255,255,255,.06) 0, rgba(255,255,255,.06) 1px, transparent 1px, transparent calc(100%/var(--steps)));
+  background-size:calc(100%/var(--steps)) 100%;
+}
+.topprogress .toplabel{position:absolute;inset:0;display:grid;place-items:center;z-index:3;font-weight:900;font-size:14px;color:#CFE3FF}
+.statusline{font-size:12px;color:var(--muted);text-align:center}
+
+.card{background:rgba(16,24,40,.72);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);animation:fade .35s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:34px;margin:0 0 6px}h2{font-size:24px;margin:0 0 10px}h3{font-size:18px;margin:16px 0 8px}
+p{margin:8px 0}.small{font-size:13px}.muted{color:var(--muted)}.center{text-align:center}
+
+/* 히어로 */
+.hero{position:relative;padding:46px 22px;border-radius:22px;border:1px solid var(--line);
+  background:linear-gradient(180deg,#0E1628 0%, #0C1322 100%);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.hero .title{font-size:44px;font-weight:900;letter-spacing:.2px;margin:2px 0 6px;color:#EAF2FF}
+.hero .sub{color:#9CB3C8;margin-bottom:18px}
+.hero .ctaRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* 버튼 */
+.btn{--bg:linear-gradient(90deg,#66E0FF,#B4F1CB);--glow:rgba(102,224,255,.35);background:var(--bg);color:#051521;border:1px solid #1f4d63;padding:18px 28px;border-radius:18px;font-weight:900;cursor:pointer;box-shadow:0 16px 40px var(--glow);transition:transform .08s,filter .2s;font-size:20px;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.btn-ghost{background:#0F172A;color:#EAF2FF;border:1px solid var(--line);padding:12px 14px;border-radius:12px;font-weight:800;cursor:pointer;box-shadow:var(--soft)}
+.btn-xl{padding:22px 34px;font-size:22px;border-radius:22px}
+
+/* 입력 */
+input,select,textarea{width:100%;background:#0B1326;color:#EAF2FF;border:1px solid var(--line);border-radius:12px;padding:12px;outline:none}
+input::placeholder{color:#6f7e94}
+input:focus,select:focus,textarea:focus{border-color:#66E0FF;box-shadow:0 0 0 6px rgba(102,224,255,.12)}
+label{font-size:14px;color:#CFE3FF}
+.section{background:#0E172B;border:1px solid var(--line);border-radius:14px;padding:16px}
+
+.grid{display:grid;gap:14px}.grid-2{grid-template-columns:1fr 1fr}
+@media (max-width:860px){.grid-2{grid-template-columns:1fr}}
+
+/* 보기 카드 (ADV: 이미지 더 작게, 캡션 더 크게) */
+.opt{border:2px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;background:#0C1426;box-shadow:var(--soft);transition:transform .12s,border-color .2s}
+.opt:hover{transform:translateY(-2px)}
+.opt .thumb{width:78%;max-width:420px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0B1326;margin:16px auto 10px;display:flex;align-items:center;justify-content:center}
+.opt .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.opt .cap{padding:12px 14px 16px;color:#CFE3FF;font-weight:850;font-size:18px;line-height:1.35;text-align:center}
+
+@media (min-width:1024px){
+  .test-grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .test-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .sideNav{position:fixed;top:50%;transform:translateY(-50%);z-index:20}
+  .sideNav.left{left:18px}.sideNav.right{right:18px}
+  .sideBtn{background:linear-gradient(90deg,#0E172B,#0B1326);border:1px solid var(--line);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;box-shadow:0 12px 26px rgba(0,0,0,.35);cursor:pointer;font-weight:900;color:#EAF2FF}
+  .sideBtn:hover{transform:translateY(-1px)}
+}
+@media (max-width:1023px){.sideNav{display:none}}
+.opt.sel{border-color:#66E0FF;box-shadow:0 0 0 6px rgba(102,224,255,.18)}
+
+/* 결과/차트 */
+.block{background:#0F172A;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);page-break-inside:avoid;break-inside:avoid}
+.block h3{margin:0 0 10px;color:#EAF2FF}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:linear-gradient(90deg,rgba(102,224,255,.2),rgba(233,213,255,.22));color:#DFF6FF;border:1px solid #28476f;padding:8px 12px;border-radius:999px;font-weight:900;white-space:nowrap}
+.callout{position:relative;background:linear-gradient(135deg,rgba(14,23,43,.9),rgba(17,28,53,.9));padding:22px;border-radius:18px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(102,224,255,.16)}
+.callout:before{content:"";position:absolute;inset:-1px;border-radius:18px;padding:1px;background:linear-gradient(90deg,#66E0FF,#B4F1CB,#E9D5FF);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+
+/* 3차트 고정 & 오버플로 방지 */
+.report-grid{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+.right-stack{display:grid;grid-template-rows:1fr 1fr;gap:16px}
+.chartBox{height:460px;border:1px solid var(--line);border-radius:14px;padding:10px;background:#0C1426}
+.right-stack .chartBox{height:220px}
+.chartBox canvas{width:100% !important;height:100% !important;display:block}
+
+/* 아코디언(동의서) */
+.acc{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0C152A}
+.acc-item+.acc-item{border-top:1px solid var(--line)}
+.acc-head{padding:16px;background:#0C152A;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.acc-head span{font-weight:900;font-size:17px}
+.acc-body{padding:16px;background:#0E172B;display:none}
+.acc-item.open .acc-body{display:block}
+
+/* 체크박스 행 */
+.checkrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0C152A}
+.checkrow input[type="checkbox"]{width:20px;height:20px;accent-color:#66E0FF;border-radius:4px}
+
+/* 프린트 & PDF */
+@media print{.header,.sticky,.btn,.btn-ghost,.sideNav,.no-pdf{display:none !important}.card{box-shadow:none;border:1px solid #2d3a58}.block{break-inside:avoid-page}}
+.pdf-screen-width{width:794px;max-width:none;margin:0 auto}
+
+/* 이메일 모달 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-backdrop.show{display:flex}
+.modal{width:min(520px,92vw);background:#0E172B;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.45);padding:18px;color:#EAF2FF}
+.modal h3{margin:0 0 10px}.modal .row{display:grid;gap:8px;margin:10px 0}.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+
+/* 페이지 하단 저작권(한 번만 표시, PDF 제외) */
+.footer{width:100%;max-width:1200px;margin:8px auto 24px;display:flex;justify-content:center}
+.footer .copyright{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:#0F172A;color:#90A3B2;font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container" id="appRoot">
+  <div class="header">
+    <div class="brand">
+      <div class="logo"></div>
+      <span>바른미술학원 · 미술적성테스트 <span class="badge">V2. ADVANCE</span></span>
+    </div>
+  </div>
+
+  <main class="main" aria-live="polite">
+    <div class="sticky">
+      <nav class="navbar" id="topnav"></nav>
+      <div class="topprogress" id="topprogress">
+        <div id="topbar" class="bar"></div>
+        <div id="toplabel" class="toplabel"></div>
+      </div>
+      <div class="statusline" id="statusline">진행률 0%</div>
+    </div>
+    <section class="card" id="app"></section>
+  </main>
+
+  <!-- 하단 저작권(한 번만) -->
+  <div class="footer no-pdf">
+    <div class="copyright">© 바른미술학원. 본 서비스 및 결과 리포트의 저작권은 바른미술학원에 있으며, 무단 전재·배포를 금합니다.</div>
+  </div>
+</div>
+
+<div class="sideNav left" id="sideLeft" style="display:none"><button class="sideBtn" onclick="prev()" aria-label="이전">‹</button></div>
+<div class="sideNav right" id="sideRight" style="display:none"><button class="sideBtn" onclick="next()" aria-label="다음">›</button></div>
+
+<!-- 이메일 모달 -->
+<div class="modal-backdrop" id="emailModal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>이메일로 결과 보내기</h3>
+    <div class="row">
+      <label>받는 사람 이메일</label>
+      <input type="email" id="emailTo" placeholder="example@email.com">
+    </div>
+    <div class="row">
+      <label>제목</label>
+      <input type="text" id="emailSubject" value="">
+    </div>
+    <div class="actions">
+      <button class="btn-ghost" id="emailCancel">취소</button>
+      <button class="btn" id="emailSend">보내기</button>
+    </div>
+    <div class="small muted" id="emailMsg" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<script>
+/* ===================== 상수/설정 ===================== */
+var APP_TITLE='바른미술학원 · 미술적성테스트 V2. ADVANCE';
+var SHEET_ID='14VLQBhDJtduxjCnfr7VEOstZ5ez8-CX3ArXy1OvYCQg';
+/* ✔️ 시트 탭 이름: Questions2 */
+var GVIZ_URL='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?sheet=Questions2&tqx=out:json';
+var FORM_ACTION='https://docs.google.com/forms/d/e/1FAIpQLSeRWq5YKN50zL0simiaQA6EBRsn6VXN__ZmLplAgDz1I1hyQA/formResponse';
+var EMAIL_FUNCTION_URL='/.netlify/functions/send-email';
+
+/* Google Form 항목 매핑(동일) */
+var F={child_name:'entry.684468179',age:'entry.1066070471',grade:'entry.1812672802',guardian:'entry.1666083184',phone:'entry.89824848',campus:'entry.490719219',answers:'entry.85364862',scores:'entry.1455508168',top3:'entry.2120338430',resultId:'entry.532514127',timestamp:'entry.1261684833'};
+
+/* ADV 도메인 (11개) */
+var DOMS=['SPA','DET','COL','NAR','CON','CHK','GRT','OBS','EXP','CRT','SOC'];
+var LABEL={SPA:'공간',DET:'디테일',COL:'색채',NAR:'서사',CON:'개념',CHK:'도전',GRT:'꾸준',OBS:'관찰',EXP:'표현',CRT:'비판',SOC:'소통'};
+var ASSET_BASE='/img-adv';
+var STEPS=[{key:'start',label:'시작'},{key:'consent',label:'동의'},{key:'profile',label:'프로필'},{key:'test',label:'테스트'},{key:'result',label:'결과'},{key:'deep',label:'심층 리포트'}];
+var STATE={step:'start',consent:false,profile:{},questions:[],idx:0,answers:[],result:null};
+
+function $(id){return document.getElementById(id)}
+function app(){return $('app')}
+
+/* ===== 요약/한줄 문구 라이브러리 ===== */
+var SUMMARIES={
+  SPA:{lead:'공간 감각이 뛰어나 화면을 구조로 먼저 읽고 안정·긴장을 설계합니다.',
+       synergy:'스케일·시점 전환이 자연스러워 장면의 몰입도를 높입니다.',
+       workflow:'초기 스케치에서 축과 소실점을 빠르게 확정하고 덩어리→세부 순으로 전개합니다.',
+       rec:'입체·원근이 중요한 프로젝트에서 주도권을 잡을 때 성과가 두드러집니다.'},
+  DET:{lead:'사소한 차이를 끝까지 붙드는 집중력으로 마감 품질이 일정합니다.',
+       synergy:'텍스처와 경계의 리듬을 조직해 화면의 밀도를 설득력 있게 만듭니다.',
+       workflow:'관찰→패턴화→강조 순으로 절차가 명확해 수정 후 내구성이 높습니다.',
+       rec:'디테일 고정이 필요한 장기 과제에서 책임자로 적합합니다.'},
+  COL:{lead:'색의 온도·채도를 정서로 번역하는 감각이 뛰어납니다.',
+       synergy:'팔레트 통일성과 포인트 대비를 함께 운영해 인상을 오래 남깁니다.',
+       workflow:'광원 성격을 구분해 로컬 컬러를 의도에 맞게 재배열합니다.',
+       rec:'무드 중심 작업, 브랜딩·라이팅 협업에서 강점이 뚜렷합니다.'},
+  NAR:{lead:'상징과 장면 전개로 이야기를 시각적으로 설계합니다.',
+       synergy:'컷 간 접속과 감정선의 고저를 조절해 흐름이 분명합니다.',
+       workflow:'인물 동기→사건→해결의 구조를 간결히 압축하는 힘이 있습니다.',
+       rec:'시퀀스·스토리보드·애니메틱에서 주도적 역할이 기대됩니다.'},
+  CON:{lead:'아이디어를 규칙과 제약으로 구조화해 흔들리지 않습니다.',
+       synergy:'리서치–가설–프로토타입 루프가 빨라 탐색 대비 산출이 큽니다.',
+       workflow:'근거와 반례를 나란히 두고 선택을 설계해 사후설명이 줄어듭니다.',
+       rec:'서비스 콘셉트·미디어 아트 아이디에이션에서 파급력이 큽니다.'},
+  CHK:{lead:'새 재료와 방식을 과감히 시험하고 실패를 학습으로 환원합니다.',
+       synergy:'우발적 결과를 포착해 규칙으로 승화시키는 순발력이 돋보입니다.',
+       workflow:'제약 조건을 먼저 걸어 창의적 우회를 설계합니다.',
+       rec:'인터랙션·신소재 프로젝트에서 성과가 큽니다.'},
+  GRT:{lead:'루틴과 타임박싱으로 학습량을 꾸준히 축적합니다.',
+       synergy:'완성 경험을 자주 반복해 품질 변동을 낮춥니다.',
+       workflow:'마일스톤 회고로 다음 작업의 리드타임을 단축합니다.',
+       rec:'장기 연작·포트폴리오 관리의 신뢰도가 높습니다.'},
+  OBS:{lead:'전체-부분을 왕복하며 핵심 형태를 요약하는 능력이 탁월합니다.',
+       synergy:'광원·비례 변화에도 구조가 안정적으로 유지됩니다.',
+       workflow:'측정–스케치–삭제의 순환으로 노이즈를 덜어냅니다.',
+       rec:'제품·과학 일러스트, 환경 콘셉트에서 정확도를 보장합니다.'},
+  EXP:{lead:'정서를 재료와 형식으로 바꾸는 번역 감각이 뛰어납니다.',
+       synergy:'선의 속도·질감·색의 온도를 맥락에 맞게 조율합니다.',
+       workflow:'같은 장면을 다른 무드로 재구성하는 능력이 탁월합니다.',
+       rec:'파인아트·캐릭터·커버 아트에서 존재감이 큽니다.'},
+  CRT:{lead:'형식–맥락–의도를 분해해 판단 근거를 제시합니다.',
+       synergy:'대안 제안까지 연결해 팀 의사결정의 속도를 높입니다.',
+       workflow:'비평 템플릿으로 감상과 평가의 경계를 명확히 합니다.',
+       rec:'큐레이션·브랜드 리뷰·교육 피드백에서 중심 역할이 적합합니다.'},
+  SOC:{lead:'의도를 명료한 언어로 압축하고 역할을 조직합니다.',
+       synergy:'발표·질의응답에서 핵심을 유지해 협업 마찰을 낮춥니다.',
+       workflow:'역할 정의·커뮤니케이션 계약을 먼저 합의해 리스크를 줄입니다.',
+       rec:'프로덕션 매니지먼트·학습 커뮤니티 운영에 강점이 있습니다.'}
+};
+
+/* ===== 가중치 증폭기 (저점 더 낮게, 평준화 축소) ===== */
+function boostWeightsAdv(w){
+  var out={}; var base=0.10; // 기존 0.18 → 0.10
+  DOMS.forEach(function(d){out[d]=base});
+  Object.entries(w||{}).forEach(function(entry){
+    var k=entry[0], v=Number(entry[1])||0;
+    var bonus=0;
+    if(v>=0.95) bonus=0.30;
+    else if(v>=0.8) bonus=0.22;
+    else if(v>=0.6) bonus=0.16;
+    else if(v>0)  bonus=0.10;
+    out[k]=Math.min(1.5, base + v*1.10 + bonus);  // 스케일 완화(1.35→1.10)
+  });
+  return out;
+}
+
+/* NAV + Progress */
+function renderNav(){
+  var cur=STEPS.findIndex(function(s){return s.key===STATE.step});
+  $('topnav').innerHTML=STEPS.map(function(s,i){
+    return '<div class="step '+(s.key===STATE.step?'active':'')+' '+(cur>i?'done':'')+'" onclick="navGo(\''+s.key+'\')"><span class="num">'+(i+1)+'</span><span>'+s.label+'</span></div>';
+  }).join('');
+}
+function updateTopProgress(){
+  var topbar=$('topbar'); var toplabel=$('toplabel'); var tp=$('topprogress'); var status=$('statusline');
+  if(STATE.step==='test'&&STATE.questions.length){
+    status.style.display='none';
+    var total=STATE.questions.length;
+    var curIndex=STATE.idx+1;
+    var pct=Math.max(0, Math.min(100, Math.round((STATE.idx)/total*100)));
+    topbar.style.width=pct+'%';
+    toplabel.textContent='('+curIndex+'/'+total+')';
+    tp.style.setProperty('--steps', String(total));
+    $('sideLeft').style.display='block';
+    $('sideRight').style.display='block';
+    return;
+  }
+  $('sideLeft').style.display='none';
+  $('sideRight').style.display='none';
+  toplabel.textContent='';
+  status.style.display='block';
+  var p=(STEPS.findIndex(function(s){return s.key===STATE.step}))/(STEPS.length-1)*100;
+  topbar.style.width=Math.round(p)+'%';
+  $('statusline').textContent='진행률 '+Math.round(p)+'%';
+}
+function navGo(step){STATE.step=step;if(step==='test'&&STATE.questions.length===0){startTest();return;}render()}
+
+/* GViz 파서 */
+function parseGViz(text){
+  var s=text.indexOf('{'),e=text.lastIndexOf('}');
+  if(s<0||e<0)return[];
+  var obj=JSON.parse(text.slice(s,e+1));
+  var cols=obj.table.cols.map(function(c){return c.label});
+  return obj.table.rows.map(function(r){return r.c.map(function(c){return c?(c.f!=null?c.f:c.v):''})})
+           .map(function(a){return Object.fromEntries(cols.map(function(k,i){return [k,a[i]]}))});
+}
+async function loadQuestions(){
+  try{
+    var txt=await (await fetch(GVIZ_URL)).text();
+    var rows=parseGViz(txt)||[];
+    var act=rows.filter(function(r){return String(r.active).toUpperCase()==='TRUE'})
+                .sort(function(a,b){return(+a.order-(+b.order))});
+    if(act.length){
+      STATE.questions=act.map(function(r){
+        function mkWeights(k){try{return boostWeightsAdv(JSON.parse(r[k+'_weights'])||{})}catch(_){return boostWeightsAdv({})}}
+        function mkOpt(k){return {key:k,label:(r[k+'_label']||'').trim(),imageUrl:(r[k+'_image']||'').trim(),weights:mkWeights(k)}}
+        var opts=['A','B','C','D'].map(mkOpt).filter(function(o){
+          var hasLabel=o.label.length>0,hasImage=o.imageUrl.length>0,hasWeight=Object.values(o.weights||{}).some(function(v){return Number(v||0)!==0});
+          return hasLabel||hasImage||hasWeight;
+        });
+        if(opts.length<2)opts=['A','B'].map(mkOpt);
+        return{id:r.id||('q'+r.order),order:+r.order,prompt:r.prompt||'',options:opts};
+      });
+      return;
+    }
+  }catch(e){}
+  STATE.questions=localQuestionsADV();
+}
+
+/* ============ 화면들 ============ */
+/* 시작 */
+function startScreen(){
+  return '<div class="hero">'
+    +'<div class="title center">'+APP_TITLE+'</div>'
+    +'<div class="sub center">중등(만 12–15세) 대상 심화 적성·흥미 진단. 11개 차원으로 분석하고 <b>심층 리포트</b>를 제공합니다.</div>'
+    +'<div class="ctaRow"><button class="btn btn-xl" id="startBtn">ADVANCE 테스트 시작 →</button>'
+    +'<a class="btn-ghost btn-xl" href="index.html" style="text-decoration:none">← BASIC 돌아가기</a></div>'
+  +'</div>'
+  +'<section class="features" style="margin:20px auto 8px;max-width:980px">'
+    +'<h2 class="center" style="font-weight:900;color:#EAF2FF">검사 특징</h2>'
+    +'<div class="grid" style="grid-template-columns:repeat(2,minmax(260px,1fr));gap:14px">'
+      + featureCard('20문항 · 10–12분','속도/정확 균형','반응성 UI & 키보드 내비게이션')
+      + featureCard('11개 차원','세분화 역량','공간·색채·개념·서사·비판 등')
+      + featureCard('심층 리포트','개인화 분석','강점·로드맵·프로젝트·직업 매핑')
+      + featureCard('PDF/이메일','보관/공유 용이','결과지 자동 생성·전송')
+    +'</div>'
+  +'</section>';
+}
+function featureCard(badgeTitle, title, sub){
+  return '<div class="card" style="display:flex;align-items:center;gap:14px">'
+      +'<div class="chip" style="font-size:18px;min-width:160px;text-align:center">'+badgeTitle+'</div>'
+      +'<div style="min-width:0"><div style="font-weight:900;white-space:nowrap">'+title+'</div><div class="small muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+sub+'</div></div>'
+    +'</div>';
+}
+function viewStart(){app().innerHTML=startScreen();$('startBtn').onclick=function(){navGo('consent')};window.scrollTo({top:0,behavior:'smooth'})}
+
+/* 동의서 (초기: 접힘 + 클릭 토글) */
+function accItem(t,html){return '<div class="acc-item"><div class="acc-head"><span>'+t+'</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#7b8fb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="acc-body small">'+html+'</div></div>'}
+function viewConsent(){
+  app().innerHTML='<h2 class="center">개인정보 수집·이용 동의서</h2>'
+  +'<div class="acc">'
+    + accItem('<b>1) 목적</b>','검사 제공, 결과 산출, PDF·이메일 전송, 상담 품질 개선 및 통계 분석(개인식별 불가).')
+    + accItem('<b>2) 수집 항목</b>','학생/보호자 이름, 나이, 학년, 연락처, 이메일(선택), 캠퍼스, 응답 내용.')
+    + accItem('<b>3) 보관 기간</b>','수집일로부터 <b>12개월</b> 보관 후 안전하게 파기합니다.')
+    + accItem('<b>4) 처리·보관처</b>','Google Forms/Sheets에 저장·처리되며, 국내외 클라우드 서버를 이용할 수 있습니다.')
+    + accItem('<b>5) 권리</b>','동의 거부 권리 및 열람·정정·삭제 요청권을 보유합니다. 단, 거부 시 서비스 제공이 제한될 수 있습니다.')
+    + accItem('<b>6) 문의</b>','barunart1004@gmail.com / 담당자: 바른미술학원')
+  +'</div>'
+  +'<div class="grid" style="margin-top:12px">'
+    +'<label class="checkrow"><span>(필수) 개인정보 수집·이용에 <b>동의합니다</b></span><input type="checkbox" id="chk_required"></label>'
+    +'<label class="checkrow"><span>(필수) 만 14세 미만 아동의 경우 법정대리인으로서 <b>동의합니다</b></span><input type="checkbox" id="chk_minor"></label>'
+  +'</div>'
+  +'<div class="center" style="margin-top:16px;display:flex;gap:8px;justify-content:center">'
+    +'<button class="btn" id="btn_consent" disabled>동의하고 진행</button>'
+    +'<button class="btn-ghost" id="btn_expand">전문 펼치기</button>'
+    +'<button class="btn-ghost" id="btn_collapse">모두 접기</button>'
+  +'</div>';
+  function validate(){ $('btn_consent').disabled=!( $('chk_required').checked && $('chk_minor').checked ); }
+  $('chk_required').addEventListener('change',validate);$('chk_minor').addEventListener('change',validate);
+  $('btn_consent').onclick=function(){STATE.consent=true;navGo('profile')};
+  $('btn_expand').onclick=function(){document.querySelectorAll('.acc-item').forEach(function(it){it.classList.add('open')})};
+  $('btn_collapse').onclick=function(){document.querySelectorAll('.acc-item').forEach(function(it){it.classList.remove('open')})};
+  document.querySelectorAll('.acc-head').forEach(function(h){h.addEventListener('click',function(){h.parentElement.classList.toggle('open')})});
+}
+
+/* 프로필 (12–15세, 중1~중3) */
+var AGE_TO_GRADE={12:'중1(예비)',13:'중학교 1학년',14:'중학교 2학년',15:'중학교 3학년'};
+var GRADE_TO_AGE={'중1(예비)':12,'중학교 1학년':13,'중학교 2학년':14,'중학교 3학년':15};
+var CAMPUSES=['압구정[본원]','반포','한남','방배','목동','송파','서대문','일산','탄현','김포','송도','부산'];
+
+function viewProfile(){
+  app().innerHTML='<h2 class="center">프로필 정보(ADV)</h2>'
+  +'<div class="grid grid-2" style="margin-top:8px">'
+    +'<div class="section"><label>학생 이름</label><input id="cname" placeholder="예: 홍길동"></div>'
+    +'<div class="section"><label>보호자/담당</label><input id="gname" placeholder="예: 김보호자"></div>'
+    +'<div class="section"><label>나이(만)</label><select id="age">'+[12,13,14,15].map(function(a){return '<option value="'+a+'">'+a+'</option>'}).join('')+'</select></div>'
+    +'<div class="section"><label>학년</label><select id="grade">'+Object.values(AGE_TO_GRADE).map(function(g){return '<option>'+g+'</option>'}).join('')+'</select></div>'
+    +'<div class="section"><label>연락처</label><input id="phone" placeholder="010-0000-0000"></div>'
+    +'<div class="section"><label>이메일(선택, 결과 전송)</label><input id="email" placeholder="example@email.com"></div>'
+    +'<div class="section"><label>캠퍼스</label><select id="campus">'+CAMPUSES.map(function(c){return '<option value="'+c+'">'+c+'</option>'}).join('')+'</select></div>'
+  +'</div>'
+  +'<div class="center" style="margin-top:16px"><button class="btn" id="btn_starttest">테스트 시작</button></div>';
+  $('age').addEventListener('change',function(e){$('grade').value=AGE_TO_GRADE[e.target.value]});
+  $('grade').addEventListener('change',function(e){$('age').value=GRADE_TO_AGE[e.target.value]});
+  $('btn_starttest').onclick=startTest;
+}
+async function startTest(){
+  STATE.profile={child_name:$('cname').value.trim(),guardian:$('gname').value.trim(),age:$('age').value,grade:$('grade').value,phone:$('phone').value.trim(),email:$('email').value.trim(),campus:$('campus').value,level:'ADV'};
+  if(!STATE.profile.child_name){alert('이름을 입력해 주세요');return;}
+  if(!/^0\d{1,2}-?\d{3,4}-?\d{4}$/.test(STATE.profile.phone||'')){alert('연락처 형식(010-0000-0000)을 확인해 주세요');return;}
+  await loadQuestions();STATE.idx=0;STATE.answers=[];STATE.step='test';render();
+}
+
+/* 테스트 */
+function pcGridClassFor(n){if(window.matchMedia('(min-width:1024px)').matches){return n===2?'test-grid-2':'test-grid-4'}return'grid grid-2'}
+function optionImageUrl(q,o){if(o.imageUrl)return o.imageUrl;var num=Number(q.order)||(STATE.idx+1);return ASSET_BASE+'/'+num+'-'+o.key+'.png'}
+function viewTest(){
+  var q=STATE.questions[STATE.idx];if(!q){app().innerHTML='<h3 class="center">문항을 불러오지 못했습니다. 관리자에 문의해 주세요.</h3>';return;}
+  var gridCls=pcGridClassFor(q.options.length);
+  app().innerHTML='<div class="center small muted"><span class="chip">Q '+(STATE.idx+1)+' / '+STATE.questions.length+'</span></div>'
+    +'<h2 class="center" style="margin-top:10px">'+(q.prompt||'')+'</h2>'
+    +'<div class="'+gridCls+'" style="margin-top:12px">'
+      + q.options.map(function(o){
+        return '<div class="opt" id="opt_'+o.key+'" tabindex="0" role="button" aria-label="'+(o.label||o.key)+'" data-key="'+o.key+'">'
+          +'<div class="thumb"><img src="'+optionImageUrl(q,o)+'" alt="'+(o.label||o.key)+'" onerror="this.style.opacity=.2" loading="lazy"></div>'
+          +'<div class="cap">'+(o.label||o.key)+'</div>'
+        +'</div>';
+      }).join('')
+    +'</div>'
+    +'<div class="center" style="margin-top:18px;display:flex;gap:10px;justify-content:center">'
+      +'<button class="btn-ghost" id="btn_prev" '+(STATE.idx===0?'disabled':'')+'>이전</button>'
+      +'<button class="btn" id="btn_next" disabled>다음</button>'
+    +'</div>';
+  q.options.forEach(function(o){var el=document.getElementById('opt_'+o.key);el.onclick=function(){choose(o.key)};el.onkeydown=function(e){if(e.key==='Enter'||e.key===' ')choose(o.key)}})
+  $('btn_prev').onclick=prev;$('btn_next').onclick=next;
+}
+function choose(key){
+  var q=STATE.questions[STATE.idx];
+  q.options.forEach(function(k){var n=document.getElementById('opt_'+k.key);if(n)n.classList.remove('sel')});
+  var node=document.getElementById('opt_'+key);if(node){node.classList.add('sel');node.animate([{transform:'scale(1)'},{transform:'scale(.98)'},{transform:'scale(1)'}],{duration:160})}
+  var opt=q.options.find(function(o){return o.key===key});STATE.answers[STATE.idx]={qid:q.id,key:key,weights:opt.weights||{}};$('btn_next').disabled=false;
+}
+function next(){if(STATE.step!=='test')return;if(!STATE.answers[STATE.idx]){alert('하나를 선택해 주세요');return;}if(STATE.idx<STATE.questions.length-1){STATE.idx++;render();}else{submitAllSafe();}}
+function prev(){if(STATE.idx>0){STATE.idx--;render();}}
+document.addEventListener('keydown',function(e){if(STATE.step!=='test')return;if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();if(e.key==='Enter'){if(!$('btn_next').disabled)next();}});
+
+/* 점수 집계 */
+function aggregateScores(ans){
+  var sum={};DOMS.forEach(function(d){sum[d]=0});
+  ans.forEach(function(a){Object.entries(a.weights||{}).forEach(function(entry){var k=entry[0],v=+entry[1]; if(sum[k]==null) sum[k]=0; sum[k]+=v})});
+  var n=ans.length||1;var raw={};
+  DOMS.forEach(function(d){var v=(sum[d]||0)/n*4;raw[d]=Math.max(0,Math.round(v*10)/10)});
+  return raw;
+}
+
+/* 결과 보정 축소: 0→1.2, 4→4.0 */
+function adjust(v){
+  var x=Math.max(0,Math.min(4,v));
+  var mapped=1.2 + 0.7*x;
+  return Math.round(mapped*10)/10;
+}
+
+/* 시각적 대비(그래프에서 저점↓/고점↑) */
+function contrastValue(v){
+  var x=Math.max(0,Math.min(4,v))/4; // 0~1
+  var gammaLow=2.25, gammaHigh=1.10;
+  var y = x<0.5 ? Math.pow(x*2,gammaLow)/2 : 1 - Math.pow((1-x)*2,gammaHigh)/2;
+  return Math.max(0,Math.min(1,y))*4;
+}
+
+function band(v){if(v>=3.6)return'S';if(v>=3.2)return'A';if(v>=2.8)return'A-';if(v>=2.4)return'B+';if(v>=2.0)return'B';if(v>=1.6)return'B-';if(v>=1.0)return'C+';return'C'}
+
+/* 밴드별 자연스런 한줄 문구 */
+function keylineByDomain(k, vBand){
+  var S=SUMMARIES[k];
+  var endByBand={
+    'S':'결과적으로 또래 대비 최상위 수준의 역량을 보여줍니다.',
+    'A':'높은 난도의 과제에서도 흔들림 없이 성과를 냅니다.',
+    'A-':'난도 상승에도 적응이 빠른 편입니다.',
+    'B+':'루틴을 조금만 강화해도 한 단계 도약이 기대됩니다.',
+    'B':'기본기가 좋아 반복 훈련으로 성장 폭을 키울 수 있습니다.',
+    'B-':'핵심 원리를 익히는 중이며 상위 영역과 연계하면 빠르게 좋아집니다.',
+    'C+':'기초가 형성되는 단계로, 강점 영역을 지렛대로 삼으면 상승 여지가 큽니다.',
+    'C':'관찰과 루틴을 병행하면 안정적 기반이 단기간에 마련됩니다.'
+  }[vBand] || '';
+  return S.lead+' '+S.synergy+' '+endByBand;
+}
+
+/* 전문 해석/진로 매핑(기본 정의) — [원문 유지] */
+var THEORY={
+  SPA:{title:'공간 구성/원근',
+      baseTheory:'공간 지능은 시지각과 운동감각이 결합된 고차 능력입니다. 2D에서 3D 깊이를 환기시키는 기술, 소실점·시점·시선유도선의 통합 운용이 핵심입니다. 구조→덩어리→광원→세부의 순서를 지키면 오류가 누적되지 않습니다.',
+      baseExpert:'스케치 초반에 축과 소실점을 빠르게 고정하며 비례가 크게 흔들리지 않습니다. 과감한 프레이밍(하이·로 앵글)에서도 주제가 안정됩니다. 레퍼런스를 해석해 자기 언어로 번역하려는 경향이 뚜렷합니다.',
+      direction:'박스 드로잉 5분 드릴→실내/외 사진에서 소실점 추적→미세 크롭 6가지 테스트를 루틴화하세요. 가끔 종이 모형이나 3D 툴로 스케일을 확인하면 오차가 빠르게 줄어듭니다.',
+      tasks:['투시 해체 노트(1·2점, 12장)','스케일 체인지 연작(같은 인물, 원근만 바꿔 4장)','광원 전환 실험(정오/실내/역광)'],
+      careers:['건축/환경디자인','무대·전시 디자이너','게임 레벨디자이너','콘셉트 아티스트']},
+  DET:{title:'정밀 묘사/마감',
+      baseTheory:'세부 묘사는 기억·주의·운동의 미세 협응이 필요합니다. 대상을 패턴 단위로 분해하고 규칙·예외를 구분해 요약합니다. 디테일이 살도록 대비와 경계를 먼저 설계하는 순서가 효율적입니다.',
+      baseExpert:'텍스처를 베끼지 않고 “규칙→변형”으로 재구성합니다. 확대 작업에서도 가장자리 선명도 차이를 자연스럽게 조절해 깊이를 만듭니다. 정리된 브러시/펜 습관과 레이어드 마감의 내구성이 좋습니다.',
+      direction:'소재 사전(금속/유리/직물/석재) 4셋 제작, “반사/확산/미세문양” 체크. 동일 대상을 10/20/40분 제한으로 3회 그려 마감 임계치를 체감하세요.',
+      tasks:['질감 스와치 40개 제작','하이라이트 재배치 실험(유광/무광)','미세 패턴 타일링 연습'],
+      careers:['일러스트레이터','조각/공예','제품 렌더러','테크니컬 아티스트']},
+  COL:{title:'색채/팔레트',
+      baseTheory:'색채는 물리(광원/재질)와 심리(연상/감정)의 교차점입니다. 명도 대비로 구조를 세우고 채도/온도로 정서를 설계합니다. 로컬 컬러에 갇히지 않으려면 참조의 조도·화이트밸런스를 먼저 표준화해야 합니다.',
+      baseExpert:'작품군 내 톤의 일관성이 높고 전환이 매끈합니다. 포화색을 절제하고 중성 영역을 넓혀 악센트를 선명하게 만듭니다. 자연광/인공광 차이에 민감하게 반응합니다.',
+      direction:'색상환 삼각/사각 조합으로 주 3회 팔레트 실험, 사진의 흑백체크로 명도 대비를 먼저 확인하세요. 야외/실내 시간을 달리해 기록하면 상대성이 체화됩니다.',
+      tasks:['팔레트 카드 30장(키/서브/악센트)','한 장면 3무드(낙관/비극/평온)','보색 잔상 실험 기록'],
+      careers:['컬러리스트','브랜딩/그래픽','미술감독(무드)','라이팅 아티스트']},
+  NAR:{title:'서사/스토리텔링',
+      baseTheory:'서사는 동기–갈등–변화의 구조를 시각 단서로 제시하는 일입니다. 패널 연결, 미장센, 시선 유도선이 함께 작동해야 인지가 끊기지 않습니다. 텍스트 없이도 이해 가능한 기호 체계가 성숙도의 지표입니다.',
+      baseExpert:'짧은 설정에도 사건의 방향이 명료하고 장면마다 감정의 고저가 분명합니다. 캐릭터의 목표와 장애가 오브젝트 배치로 드러납니다.',
+      direction:'3·6·9컷 포맷으로 동일 이야기를 길이만 달리 제작하세요. “같은 사건, 다른 장르(코미디/누아르/서정)” 재연출로 표현 스펙트럼을 넓히면 좋습니다.',
+      tasks:['비트시트 12장','무대 속성 카드(시간·장소·기상)','소도구 중심 성격 드러내기'],
+      careers:['애니메이터','콘티/스토리보드','아트디렉터','게임 시네마틱']},
+  CON:{title:'개념화/아이디어',
+      baseTheory:'개념화는 데이터를 모으는 것보다 의미 있는 제약을 세우는 것입니다. 문제 정의→가정→프로토타입→검증 루프가 짧을수록 시행착오가 줄어듭니다. 메타포/프레이밍으로 관찰을 전달 가능한 언어로 바꾸는 게 핵심입니다.',
+      baseExpert:'레퍼런스를 맹목적으로 모으지 않고 선택/폐기 기준을 명시합니다. 스케치 단계에서 실패 가능성을 체크리스트로 관리합니다.',
+      direction:'프로젝트마다 “가정–근거–반례” 3행 메모, 24시간 내 프로토타입 1개 산출. 완성도 압박을 낮추되 관찰 포인트는 명확히 기록하세요.',
+      tasks:['은유 사전(키워드 50)','1일 1프로토타입(2주)','참조-모사-변형 3단계'],
+      careers:['컨셉 아티스트','미디어아트','서비스/UX 콘셉트','전시 기획']},
+  CHK:{title:'도전/실험성',
+      baseTheory:'실험성은 위험을 관리하는 기술입니다. “목표 변수–허용 오차–조기 중단 기준”을 정하면 실패 비용이 작아집니다. 우발을 포착해 규칙으로 바꾸는 순발력이 중요합니다.',
+      baseExpert:'새로운 규칙을 스스로 만들고 그 안에서 놉니다. 실패 기록을 공유 가능한 언어로 남겨 팀의 시행착오를 줄입니다.',
+      direction:'제약 과제(3색 제한, 반대손 드로잉, 5분 타임어택)를 주기적으로 돌리고, 인터랙션/신소재를 가끔 섞어 감각 폭을 넓히세요.',
+      tasks:['제약 미션 10종','재료 조합 매트릭스','실패 아카이브(원인-대응-학습)'],
+      careers:['실험미술','신소재 연구','이머시브 아트','인터랙션 디자이너']},
+  GRT:{title:'꾸준/지속성',
+      baseTheory:'꾸준함은 의지보다 시스템 문제입니다. 타임박싱·칸반·마일스톤으로 “보이는 진척”을 만들면 동력이 유지됩니다. 완성의 빈도가 실력 분산을 줄이는 가장 강력한 변수입니다.',
+      baseExpert:'중단 이후 재개 속도가 빨라 프로젝트가 길어져도 품질이 흔들리지 않습니다. 피드백 반영 주기가 짧아 학습 곡선이 가파릅니다.',
+      direction:'주 5일×25분 루틴 + 금요일 회고(3문장), 진행 사진을 타임라인으로 정리하세요. 버전 관리가 동기를 지탱합니다.',
+      tasks:['칸반 보드(할 일/진행/완료)','버전 히스토리 10장','마일스톤 리뷰(매주)'],
+      careers:['포트폴리오 매니지먼트','연구 기반 작업','시리즈 제작','아티스트 러너']},
+  OBS:{title:'관찰/분석',
+      baseTheory:'관찰은 “있는 그대로”가 아니라 “핵심만 남기기”입니다. 실루엣과 큰 명암 덩어리로 구조를 잡고, 반복과 변주의 규칙을 찾습니다. 측정과 삭제가 함께 일어날 때 노이즈가 줄어듭니다.',
+      baseExpert:'광원·시점 변화에도 비례가 안정적입니다. 과감한 생략으로 주제 가독성을 높입니다.',
+      direction:'광원 각도만 바꿔 같은 대상을 4회 스케치, 확대 크롭을 원화에 재통합하는 훈련을 하세요. 관찰 메모(오류·발견·가설)를 같이 남기면 학습이 빠릅니다.',
+      tasks:['비율 측정 드릴','광원 전환 시리즈 8장','디테일 크롭-리턴 실험'],
+      careers:['자연사/과학 일러스트','제품 디자이너','환경 콘셉트','데이터 비주얼']},
+  EXP:{title:'표현/정서',
+      baseTheory:'표현은 감정의 분출이 아니라 매체적 번역입니다. 선의 속도·두께, 재질의 마찰, 색의 온도가 합쳐져 무드가 만들어집니다. 동일 사건을 다른 정서로 다시 쓰는 능력이 폭넓은 표현력을 보장합니다.',
+      baseExpert:'클라이맥스의 과잉/부족을 잘 피하고, 과장과 생략의 비율을 능숙하게 조절합니다.',
+      direction:'음악·글과 연동한 감정 팔레트 실험(낙관/불안/평온)과 동일 장면 3무드 재연출을 추천합니다.',
+      tasks:['감정-팔레트 15쌍','브러시 속도 실험 차트','무드 변환 연작(3×3)'],
+      careers:['파인아트','캐릭터 아트','편집/표지','아트세라피 보조*']},
+  CRT:{title:'비판/평가',
+      baseTheory:'비평은 의견이 아니라 구조화된 판단입니다. 형식(구성·기법)–맥락(레퍼런스·시대성)–의도(메시지)로 쪼개고, 층위별 근거를 제시해야 합니다. 대안 제안이 동반될 때 피드백의 수용성이 높아집니다.',
+      baseExpert:'문제 지점을 정밀하게 포착하고 단계별 대안을 제시합니다. 팀 의사결정의 기준을 세우는 역할을 자주 맡습니다.',
+      direction:'피드백 5문장 템플릿(칭찬/근거/문제/대안/다음 행동)을 사용하세요. 라이트/헤비 리라이팅을 구분해 부담을 낮추면 지속가능합니다.',
+      tasks:['작품 리뷰 카드 20장','비평 프레임 체크리스트','리라이팅 전·후 비교'],
+      careers:['큐레이터','크리틱/리뷰어','아트에듀케이터','브랜드 디렉터']},
+  SOC:{title:'소통/협업',
+      baseTheory:'소통은 정보 전달을 넘어 “공통의 기대값”을 설계하는 일입니다. 역할 정의와 경계 합의, 회의의 목적·출력 정의가 먼저 있어야 마찰이 줄어듭니다. 발표–질의응답에서 핵심을 잃지 않는 훈련이 중요합니다.',
+      baseExpert:'질문으로 타인의 관점을 끌어내며, 타임라인·리소스 관리를 명료하게 공유합니다.',
+      direction:'역할 캔버스(책임·권한·의존성) 작성, 회의마다 결정/보류/액션을 분류하세요. “좋았던 점/이유/다음 선택” 피드백 규칙을 팀 표준으로.',
+      tasks:['역할 정의 캔버스','스탠드업 10일','발표-질의응답 스크립트'],
+      careers:['프로덕션 매니저','아트 리드/PM','커뮤니티 아트','교육 콘텐츠']}
+};
+
+/* 긴 문장 생성 함수 */
+function multiline(lines){return lines.map(function(s){return s}).join(' ')}
+function genTheoryText(k, b){
+  var t=THEORY[k];
+  var pos={
+    'S':'핵심 원리가 이미 체화돼 있어 복잡한 조건에서도 일관된 품질을 유지합니다.',
+    'A':'핵심 이론 이해가 깊어 새로운 상황에도 적용이 빠릅니다.',
+    'A-':'개념이 잘 잡혀 있어 난도가 올라가도 방향을 잃지 않습니다.',
+    'B+':'핵심 개념을 실전으로 옮기는 단계이며 반복 속도가 성장의 열쇠입니다.',
+    'B':'기본 개념을 안정화하는 중으로 작은 완성을 자주 만들면 좋습니다.',
+    'default':'관찰과 개념 연결고리를 분명히 할수록 성장이 가속됩니다.'
+  }[b] || '관찰과 개념 연결고리를 분명히 할수록 성장이 가속됩니다.';
+  var arr=[t.baseTheory,'연구와 실습을 오가며 규칙과 예외를 구분하는 습관이 중요합니다.','참조 이미지는 단순 모사가 아니라 구조 해석의 도구로 쓰일 때 가치가 커집니다.','작업 초반의 결정을 기록해두면 이후 수정이 체계적으로 이뤄집니다.','마감 단계에서는 기준선을 낮추기보다 과감히 덜어내는 선택이 전체 완성도를 지키는 경우가 많습니다.',pos];
+  return multiline(arr);
+}
+function genExpertText(k, b){
+  var t=THEORY[k];
+  var commonHead='이 영역에서 강점을 보일 때는 ';
+  var tail={
+    'S':'짧은 시간에도 결과물이 명확히 읽히고, 팀 프로젝트에서 방향 제시 역할을 자연스럽게 맡는 경우가 많습니다.',
+    'A':'고난도 과제에서 속도와 품질의 균형이 잘 맞고, 피드백을 곧바로 구조 개선으로 환원하는 경우가 많습니다.',
+    'A-':'새로운 제약이 생겨도 핵심을 유지하며, 실험을 통해 더 나은 선택지를 찾아내는 경우가 많습니다.',
+    'B+':'루틴의 탄력이 붙으면서 표준 작업 시간이 줄고, 작은 완성의 빈도가 늘어나는 경우가 많습니다.',
+    'B':'기초를 성실히 쌓아 가시적인 성장 곡선을 그리는 경우가 많습니다.',
+    'default':'강점 축과 연결해 두면 짧은 기간에도 체감 성장을 경험하는 경우가 많습니다.'
+  }[b] || '강점 축과 연결해 두면 짧은 기간에도 체감 성장을 경험하는 경우가 많습니다.';
+  var specific={
+    SPA:'시점 전환과 크롭 선택이 과감하면서도 주제의 안정이 유지됩니다.',
+    DET:'가장자리와 하이라이트의 우선순위를 명료하게 정해 화면의 집중도를 높입니다.',
+    COL:'명도 구조가 먼저 잡히고, 포인트 색은 절제해 사용합니다.',
+    NAR:'장면 전환이 매끄럽고, 감정선의 고저가 분명합니다.',
+    CON:'가설과 반례를 나란히 놓고 빠르게 프로토타입을 산출합니다.',
+    CHK:'제약을 먼저 만들고 그 안에서 새로운 규칙을 발견합니다.',
+    GRT:'중단 후 재개의 속도가 빨라 프로젝트가 길어져도 품질 편차가 적습니다.',
+    OBS:'큰 덩어리에서 세부로 이동하며 불필요한 정보를 과감히 덜어냅니다.',
+    EXP:'선의 속도와 질감이 정서 변화와 함께 움직입니다.',
+    CRT:'문제 지점을 근거로 짚고 실행 가능한 대안을 제시합니다.',
+    SOC:'요청과 기대치를 명확히 언어화해 협업 마찰을 낮춥니다.'
+  }[k];
+  var arr=[commonHead + specific,'반대로 약점으로 출발하더라도, 동일한 체크리스트를 쓰면 단기간에 안정 구간에 진입하는 사례가 많습니다.','작업 기록(의도·선택·대안)을 남기는 습관은 다음 프로젝트의 리드타임을 줄이고 설득력 있는 포트폴리오를 만드는 데 도움이 됩니다.',tail];
+  return multiline(arr);
+}
+
+/* 제출 & 결과 */
+function nowKST(){var d=new Date(),p=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+' KST'}
+async function submitAllSafe(){
+  var raw=aggregateScores(STATE.answers);
+  var scores={}; Object.keys(raw).forEach(function(k){scores[k]=adjust(raw[k])});
+  var ordered=Object.keys(scores).sort(function(a,b){return scores[b]-scores[a]});
+  var top3=ordered.slice(0,3);
+  var resultId=(crypto&&crypto.randomUUID)?crypto.randomUUID():('r'+Date.now());
+  var form=new FormData();
+  form.append(F.child_name,STATE.profile.child_name);form.append(F.age,STATE.profile.age);form.append(F.grade,STATE.profile.grade);
+  form.append(F.guardian,STATE.profile.guardian);form.append(F.phone,STATE.profile.phone);form.append(F.campus,STATE.profile.campus||'');
+  form.append(F.answers,JSON.stringify({profile:STATE.profile,questions:STATE.answers,top3:top3}));
+  form.append(F.scores,JSON.stringify(scores));form.append(F.top3,top3.join(','));form.append(F.resultId,resultId);form.append(F.timestamp,nowKST());
+  try{await fetch(FORM_ACTION,{method:'POST',mode:'no-cors',body:form});}catch(e){}
+  STATE.result={scores:scores,top3:top3,resultId:resultId,ordered:ordered};STATE.step='result';render();
+}
+
+var CHARTS=[];function destroyCharts(){CHARTS.forEach(function(c){try{c.destroy()}catch(_){}});CHARTS=[]}
+
+/* 요약 코멘트(4~5줄) */
+function buildLongSummary(top4, low4){
+  var a=top4[0], b=top4[1], c=top4[2], d=top4[3];
+  var s1='<b>'+STATE.profile.child_name+'</b> 학생은 <b>'+LABEL[a]+'</b> 축을 중심으로 '+LABEL[b]+', '+LABEL[c]+'에서 강점이 분명합니다.';
+  var s2=SUMMARIES[a].lead+' '+SUMMARIES[b].synergy;
+  var s3='작업 방식은 '+SUMMARIES[a].workflow+' '+SUMMARIES[c].workflow;
+  var s4='학습 전략으로는 '+SUMMARIES[a].rec+' 또한 '+SUMMARIES[d].rec;
+  var s5=low4.length?('아래 4개 영역('+low4.map(function(x){return LABEL[x]}).join(' · ')+')은 현재 강점을 지렛대로 확장 가능한 <b>잠재적인 영역</b>으로 해석됩니다.'): '';
+  return [s1,s2,s3,s4,s5].filter(Boolean).join(' ');
+}
+
+/* 결과(편차 강조: 차트/타일 모두 contrastValue 사용) */
+function viewResult(){
+  var r=STATE.result||{}; var s=r.scores||{}; var ordered=r.ordered||Object.keys(s).sort(function(a,b){return s[b]-s[a]});
+  var top4=ordered.slice(0,4);
+  var low4=ordered.slice(-4);
+
+  var longSummary=buildLongSummary(top4, low4);
+
+  app().innerHTML='<div id="pdfArea" class="pdf-screen-width">'
+    +'<div class="block callout" style="text-align:center">'
+      +'<div class="chip" style="margin:0 auto 8px;display:inline-block">ADVANCE 결과</div>'
+      +'<h2 style="margin:0 0 10px"><b>'+STATE.profile.child_name+'</b>님의 핵심 프로파일</h2>'
+      +'<div class="chips" style="margin-top:10px;justify-content:center">'+top4.map(function(t){return '<span class="chip">뛰어난 영역 · '+LABEL[t]+'</span>'}).join('')+'</div>'
+    +'</div>'
+
+    +'<div class="block">'
+      +'<h3 class="center">프로파일 & 주요 지표</h3>'
+      +'<div class="report-grid" style="margin-top:8px">'
+        +'<div><div class="chartBox"><canvas id="radar"></canvas></div></div>'
+        +'<div class="right-stack">'
+          +'<div><div class="small" style="text-align:center;margin:6px 0 4px">뛰어난 영역 (TOP4)</div><div class="chartBox"><canvas id="barsTop4"></canvas></div></div>'
+          +'<div><div class="small" style="text-align:center;margin:6px 0 4px">잠재적인 영역</div><div class="chartBox"><canvas id="barsPotential"></canvas></div></div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    +'<div class="block"><h3>요약 코멘트</h3><p class="small" style="line-height:1.9">'+longSummary+'</p></div>'
+
+    + summaryTiles(s, ordered)
+
+  +'</div>'
+
+  +'<div class="center no-pdf" style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+    +'<button class="btn-ghost" onclick="STATE.step=\'start\'; render()">처음으로</button>'
+    +'<button class="btn" id="btn_pdf">PDF 저장</button>'
+    +'<button class="btn-ghost" onclick="STATE.step=\'deep\'; render()">심층 리포트 보기</button>'
+    +'<button class="btn" id="btn_email">이메일로 보내기</button>'
+  +'</div>';
+
+  destroyCharts();
+
+  var tooltipOff={enabled:false,external:function(){return}}; // 숫자 노출 방지
+  var c=contrastValue;
+
+  // 레이더(11차원) — contrastValue 적용
+  var rctx=document.getElementById('radar').getContext('2d',{willReadFrequently:true});
+  CHARTS.push(new Chart(rctx,{type:'radar',
+    data:{labels:DOMS.map(function(d){return LABEL[d]}),datasets:[{data:DOMS.map(function(k){return c(s[k]||0)}),borderColor:'#66E0FF',backgroundColor:'rgba(102,224,255,.18)',borderWidth:2,pointRadius:3,fill:true}]},
+    options:{maintainAspectRatio:false,animation:{duration:800},scales:{r:{suggestedMin:0,suggestedMax:4,ticks:{display:false},grid:{color:'#1E2A48'},angleLines:{color:'#1E2A48'}}},plugins:{legend:{display:false},tooltip:tooltipOff}}
+  }));
+
+  // TOP4 (뛰어난 영역)
+  var b1=document.getElementById('barsTop4').getContext('2d',{willReadFrequently:true});
+  CHARTS.push(new Chart(b1,{type:'bar',
+    data:{labels:top4.map(function(d){return LABEL[d]}),datasets:[{data:top4.map(function(k){return c(s[k]||0)}),borderRadius:12,borderSkipped:false,backgroundColor:['#66E0FF','#B4F1CB','#E9D5FF','#FFAA6C']}]},
+    options:{maintainAspectRatio:false,animation:{duration:700},scales:{y:{suggestedMin:0,suggestedMax:4,ticks:{display:false},grid:{color:'#1E2A48'}},x:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:tooltipOff}}
+  }));
+
+  // 하위 4 (잠재적인 영역)
+  var b2=document.getElementById('barsPotential').getContext('2d',{willReadFrequently:true});
+  CHARTS.push(new Chart(b2,{type:'bar',
+    data:{labels:low4.map(function(d){return LABEL[d]}),datasets:[{data:low4.map(function(k){return c(s[k]||0)}),borderRadius:12,borderSkipped:false,backgroundColor:['#B4F1CB','#E9D5FF','#66E0FF','#FFAA6C']}]},
+    options:{maintainAspectRatio:false,animation:{duration:700},scales:{y:{suggestedMin:0,suggestedMax:4,ticks:{display:false},grid:{color:'#1E2A48'}},x:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:tooltipOff}}
+  }));
+
+  $('btn_pdf').onclick=handleSavePdf;$('btn_email').onclick=openEmailModal;
+}
+
+/* 항목 타일(contrastValue로 편차 강조) */
+function summaryTiles(scores, ordered){
+  return '<div class="block"><h3>항목별 핵심 한 줄</h3>'
+    +'<div class="grid" style="grid-template-columns:1fr 1fr 1fr">'
+    + ordered.map(function(k){
+      var v=+(scores[k]||0); var w=Math.min(100,(contrastValue(v)/4)*100); var b=band(v);
+      var p=keylineByDomain(k, b);
+      return '<div style="border:1px solid var(--line);border-radius:12px;padding:12px;background:#0B1326">'
+        +'<div style="font-weight:900;margin-bottom:4px">'+LABEL[k]+'</div>'
+        +'<div class="topprogress" style="height:8px;margin:8px 0 10px;background:#0F172A">'
+          +'<div style="width:'+w+'%;height:100%;background:linear-gradient(90deg,#66E0FF,#B4F1CB,#FFAA6C)"></div>'
+        +'</div>'
+        +'<div class="small">'+p+'</div>'
+      +'</div>';
+    }).join('')
+    +'</div></div>';
+}
+
+/* ================= 심층 리포트 ================= */
+function deepSection(title, html){return '<div class="block" style="margin-top:12px"><h3>'+title+'</h3>'+html+'</div>'}
+function list(items){return '<ul style="margin:6px 0 0 18px">'+items.map(function(x){return '<li class="small">'+x+'</li>'}).join('')+'</ul>'}
+
+function deepBlock(k,i,scoreBand){
+  var t=THEORY[k];
+  return '<div class="card" style="margin:8px 0;background:#0C152A;border-color:#223358">'
+    +'<div style="font-weight:900;margin-bottom:8px">'+(i)+'. '+LABEL[k]+' — '+t.title+'</div>'
+    +'<div class="small" style="line-height:1.9"><b>이론</b>: '+genTheoryText(k,scoreBand)+'</div>'
+    +'<div class="small" style="line-height:1.9;margin-top:6px"><b>전문가 의견</b>: '+genExpertText(k,scoreBand)+'</div>'
+    +'<div class="small" style="line-height:1.9;margin-top:6px"><b>발달 방향</b>: '+t.direction+'</div>'
+    + (t.tasks && t.tasks.length ? ('<div class="small" style="margin-top:6px"><b>연습 과제</b>:'+list(t.tasks)+'</div>') : '')
+    +'<div class="small" style="margin-top:6px"><b>연계 직업군</b>: '+t.careers.join(' · ')+'</div>'
+  +'</div>';
+}
+
+function viewDeep(){
+  var s=(STATE.result||{}).scores||{}; 
+  var ordered=(STATE.result||{}).ordered||Object.keys(s).sort(function(a,b){return s[b]-s[a]});
+  var top5=ordered.slice(0,5), low2=ordered.slice(-2);
+
+  var header='<div class="block callout" style="text-align:center">'
+    +'<div class="chip">심층 리포트</div>'
+    +'<h2 style="margin:6px 0 0"><b>'+STATE.profile.child_name+'</b> · ADVANCE 잠재력 진단</h2>'
+    +'<div class="small muted">검사 기준: '+DOMS.length+'개 차원 / 중등(만 12–15세)</div>'
+    +'</div>';
+
+  var strengthsHTML=top5.map(function(k,i){return deepBlock(k,i+1,band(s[k]||0))}).join('');
+
+  var roadmap=deepSection('4주 성장 로드맵(주 5일 × 25분)',
+    list([
+      '<b>Week 1 · 기초 리셋</b>: 강점 축 2개 선택 → 데일리 25분 스터디(관찰/색채 등) 기록',
+      '<b>Week 2 · 실험 확장</b>: 새로운 재료 1종 도입, 실패노트(문제→시도→결과) 작성',
+      '<b>Week 3 · 미니 프로젝트</b>: 3~4점 시리즈(주제·팔레트·구도 통일)로 작은 완성 만들기',
+      '<b>Week 4 · 발표/피드백</b>: 작가노트 5문장·제목 3안·자기평가표, 피드백 1개 반영'
+    ])+
+    '<div class="small muted" style="margin-top:6px">* 루틴 도구: 칸반(할 일/진행/완료), 타임박싱(25–5), 마일스톤(매주 금요일 리뷰)</div>'
+  );
+
+  var proj=deepSection('프로젝트 제안(선택 2)',
+    list([
+      '<b>무드-팔레트 라이브러리</b>: 영화/자연 사진에서 5색 추출→팔레트 카드 20장 제작(색채·개념)',
+      '<b>미니 다이어라마</b>: 상상 공간의 스케일·원근을 실물 모형으로 구축(공간·디테일)',
+      '<b>서사 카드 12</b>: 인물 감정 3단 변화 × 4장면, 스토리비트와 콘트라스트 설계(서사·표현)',
+      '<b>실험 재료 로그북</b>: 잉크/파스텔/콜라주 조합 실험 30가지, 실패 사례 포함(도전·비판)'
+    ])
+  );
+
+  var weak=deepSection('리스크 & 보완 전략(하위 2개 중심)',
+    low2.map(function(k){
+      return '<div class="section" style="background:#0C152A;border-color:#223358;margin-bottom:8px">'
+        +'<div style="font-weight:900;margin-bottom:4px">'+LABEL[k]+' · 보완 가이드</div>'
+        + list([
+            '미시 목표: '+LABEL[k]+'만 겨냥한 10분 루틴(매일, 2주)',
+            '메타 인지: 작업 전 체크리스트 3문항(의도·참조·마감기준)',
+            '협업: 상위 영역 팀원과 페어워크로 보완(상호 코멘트 1회/주)'
+          ])
+        +'</div>';
+    }).join('')
+  );
+
+  var career=deepSection('미래 직업군 연계성',
+    '<div class="grid" style="grid-template-columns:1fr 1fr 1fr">'+
+    top5.map(function(k){
+      var t=THEORY[k]||{careers:[]}; 
+      return '<div class="section" style="background:#0C152A;border-color:#223358">'
+        +'<div style="font-weight:900;margin-bottom:4px">'+LABEL[k]+' → 유망 분야</div>'
+        + list(t.careers.map(function(c){return c+' · 적합';}))
+        +'</div>';
+    }).join('')+
+    '</div>'+
+    '<div class="small muted" style="margin-top:8px">* 실제 진로 선택은 포트폴리오 스펙트럼, 성향, 학과 요구조건 등을 함께 고려합니다.</div>'
+  );
+
+  var rubric=deepSection('포트폴리오 루브릭(5척도 요약)',
+    list([
+      '<b>구성력</b>: 화면 균형/리듬/시선유도',
+      '<b>완성도</b>: 질감·마감·디테일 일관성',
+      '<b>실험성</b>: 재료/방식 확장, 실패 수용',
+      '<b>서사·의도</b>: 맥락·메시지 명료성',
+      '<b>발표/소통</b>: 작가노트·발표·질의응답'
+    ])
+  );
+
+  app().innerHTML= header + strengthsHTML + roadmap + proj + weak + career + rubric
+  + '<div class="center no-pdf" style="margin:16px 0;display:flex;gap:8px;justify-content:center">'
+  + '<button class="btn-ghost" onclick="STATE.step=\'result\'; render()">요약 결과로</button>'
+  + '<button class="btn" id="btn_pdf2">PDF 저장</button>'
+  + '</div>';
+
+  $('btn_pdf2').onclick=handleSavePdf;
+}
+
+/* Router */
+function render(){renderNav();updateTopProgress();
+  if(STATE.step==='start')return viewStart();
+  if(STATE.step==='consent')return viewConsent();
+  if(STATE.step==='profile')return viewProfile();
+  if(STATE.step==='test')return viewTest();
+  if(STATE.step==='result')return viewResult();
+  if(STATE.step==='deep')return viewDeep();
+}
+render();
+
+/* ===== PDF/이메일 ===== */
+function buildPdfWrapperFrom(node){
+  var wrap=document.createElement('div');
+  wrap.style.position='fixed';wrap.style.left='-10000px';wrap.style.top='0';
+  wrap.style.width='794px';wrap.style.background='#fff';wrap.style.zIndex='-1';
+  var clone=node.cloneNode(true);
+  clone.querySelectorAll('img').forEach(function(img){img.setAttribute('crossorigin','anonymous');img.referrerPolicy='no-referrer';img.src=img.src});
+  var srcC=node.querySelectorAll('canvas');var dstC=clone.querySelectorAll('canvas');
+  srcC.forEach(function(src,i){var dst=dstC[i];if(!dst)return;dst.width=src.width;dst.height=src.height;dst.getContext('2d',{willReadFrequently:true}).drawImage(src,0,0)});
+  wrap.appendChild(clone);document.body.appendChild(wrap);
+  return wrap;
+}
+function waitForAssets(root){
+  var imgs=[].slice.call(root.querySelectorAll('img'));
+  var imgPromises=imgs.map(function(img){return img.complete?Promise.resolve():new Promise(function(res){img.onload=function(){res()};img.onerror=function(){res()}})});
+  var fontsReady=('fonts'in document)?document.fonts.ready:Promise.resolve();
+  return Promise.all([fontsReady].concat(imgPromises));
+}
+async function html2pdfBlob(wrapper){
+  var opt={margin:[8,8,8,8],
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',removeContainer:true,windowWidth:wrapper.scrollWidth,windowHeight:wrapper.scrollHeight},
+    pagebreak:{mode:['css','legacy']},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  return await html2pdf().set(opt).from(wrapper).output('blob');
+}
+async function canvasSlicerBlob(wrapper){
+  var h2c=window.html2canvas;
+  var canvas=await h2c(wrapper,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:wrapper.scrollWidth,windowHeight:wrapper.scrollHeight});
+  var jsPDF=window.jspdf.jsPDF;
+  var pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+  var pxToMm=210/canvas.width;
+  var pageHeightPx=Math.floor(297/pxToMm);
+  var y=0,page=0;
+  while(y<canvas.height){
+    var sliceHeight=Math.min(pageHeightPx,canvas.height-y);
+    var pageCanvas=document.createElement('canvas');
+    pageCanvas.width=canvas.width;pageCanvas.height=sliceHeight;
+    var ctx=pageCanvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(canvas,0,y,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
+    var img=pageCanvas.toDataURL('image/jpeg',0.98);
+    var mmHeight=sliceHeight*pxToMm;
+    if(page>0) pdf.addPage();
+    pdf.addImage(img,'JPEG',0,0,210,mmHeight);
+    y+=sliceHeight;page++;
+  }
+  return pdf.output('blob');
+}
+async function exportPdfBlob(node){
+  var wrapper=buildPdfWrapperFrom(node);
+  await waitForAssets(wrapper);
+  try{
+    var blob=await html2pdfBlob(wrapper);
+    if(!blob || blob.size<5000){ blob=await canvasSlicerBlob(wrapper); }
+    return blob;
+  }catch(e){
+    try{ return await canvasSlicerBlob(wrapper); }
+    catch(e2){ throw e2; }
+  }finally{ wrapper.remove(); }
+}
+async function handleSavePdf(){
+  var node=document.querySelector('#pdfArea') || document.querySelector('.main');
+  if(!node){alert('PDF 영역을 찾을 수 없습니다.');return;}
+  node.classList.add('pdf-screen-width');
+  await new Promise(function(r){setTimeout(r,50)});
+  try{
+    var blob=await exportPdfBlob(node);
+    var filename=STATE.profile.child_name+'_미술적성_ADVANCE.pdf';
+    var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }catch(e){console.error(e);alert('PDF 저장 중 오류가 발생했습니다.')}
+  finally{node.classList.remove('pdf-screen-width');}
+}
+
+/* 이메일 모달 */
+function setModalVisible(show){var m=$('emailModal');if(show){m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}else{m.classList.remove('show');m.setAttribute('aria-hidden','true');document.body.style.overflow=''}}
+function openEmailModal(){setModalVisible(true);$('emailSubject').value=STATE.profile.child_name+' ADVANCE 결과입니다';$('emailTo').value=STATE.profile.email||'';$('emailMsg').textContent=''}
+$('emailCancel').onclick=function(){setModalVisible(false)};document.addEventListener('keydown',function(e){if(e.key==='Escape')setModalVisible(false)});
+function blobToBase64(blob){return new Promise(function(resolve,reject){var reader=new FileReader();reader.onloadend=function(){resolve(reader.result.split(',')[1])};reader.onerror=reject;reader.readAsDataURL(blob)})}
+$('emailSend').onclick=async function(){
+  var to=$('emailTo').value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)){ $('emailMsg').textContent='이메일 형식을 확인해 주세요.'; return; }
+  $('emailMsg').textContent='PDF 생성 중...';
+  var base64='';try{var node=document.querySelector('#pdfArea')||document.querySelector('.main');var blob=await exportPdfBlob(node);base64=await blobToBase64(blob)}catch(e){$('emailMsg').textContent='PDF 생성에 실패했습니다.';return}
+  $('emailMsg').textContent='이메일 전송 중...';
+  var subject=$('emailSubject').value.trim()|| (STATE.profile.child_name+' ADVANCE 결과입니다');
+  var htmlBody='<div style="font-family:Pretendard,Segoe UI,Arial;color:#222"><h2 style="margin:0 0 8px">'+APP_TITLE+'</h2><p><b>'+STATE.profile.child_name+'</b> 님의 결과지를 첨부했습니다.</p><p>캠퍼스: '+(STATE.profile.campus||'-')+' / 연락처: '+(STATE.profile.phone||'-')+'</p><p style="color:#666;font-size:12px;margin-top:12px">본 메일은 자동 발송되었습니다.</p></div>';
+  try{
+    var res=await fetch(EMAIL_FUNCTION_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:to,subject:subject,html:htmlBody,attachmentName:STATE.profile.child_name+'_미술적성_ADVANCE.pdf',attachmentBase64:base64})});
+    var ok=res.ok;var data={};try{data=await res.json()}catch(_){}
+    if(ok){$('emailMsg').textContent='전송 완료! 메일함을 확인해 주세요.';setTimeout(function(){setModalVisible(false)},1200)}
+    else{$('emailMsg').textContent='전송 실패: '+(data.error||res.statusText)}
+  }catch(err){$('emailMsg').textContent='전송 중 오류가 발생했습니다.'}
+}
+
+/* ============ Fallback 20문항 (증폭 적용) ============ */
+function W(w){return boostWeightsAdv(w||{})}
+function localQuestionsADV(){
+  function S(q,p,a,b,c,d){return{id:q,order:+q.replace('q',''),prompt:p,options:[
+    {key:'A',label:a[0],imageUrl:a[1],weights:W(a[2])},
+    {key:'B',label:b[0],imageUrl:b[1],weights:W(b[2])},
+    {key:'C',label:c[0],imageUrl:c[1],weights:W(c[2])},
+    {key:'D',label:d[0],imageUrl:d[1],weights:W(d[2])}
+  ]}}
+  function IMG(num,k){return ASSET_BASE+'/'+num+'-'+k+'.png'}
+
+  return [
+    S('q1','이 그림을 볼 때 가장 먼저 시선이 가는 곳은?', ['전체 구도/배치', IMG(1,'A'), {SPA:1}],['붓 터치/세밀',IMG(1,'B'),{DET:1}],['강렬한 색 조합',IMG(1,'C'),{COL:1}],['숨겨진 상징/의미',IMG(1,'D'),{NAR:1}]),
+    S('q2','‘자유’를 그림으로 표현한다면 가장 먼저 떠오르는 이미지는?', ['하늘과 새',IMG(2,'A'),{NAR:0.5,CON:0.4,COL:0.3}],['복잡한 선/도형',IMG(2,'B'),{CON:0.8}],['불규칙한 색 조합',IMG(2,'C'),{COL:0.9,CHK:0.4}],['뛰노는 사람들',IMG(2,'D'),{EXP:0.7,NAR:0.5}]),
+    S('q3','‘시작과 끝’ 연작을 만든다면?', ['상징 정물 2점',IMG(3,'A'),{CON:0.6,DET:0.5}],['서사 연결 4컷',IMG(3,'B'),{NAR:1}],['동일 도형·색 변주',IMG(3,'C'),{COL:0.6,CHK:0.5}],['한 그림의 변주 다수',IMG(3,'D'),{GRT:0.6,DET:0.5}]),
+    S('q4','친구 그림 피드백 시 가장 중요하게 보는 것?', ['이야기/감정',IMG(4,'A'),{NAR:0.6,EXP:0.4}],['형태/구도 안정',IMG(4,'B'),{SPA:0.9}],['사실성/섬세함',IMG(4,'C'),{DET:0.9}],['새로운 시도',IMG(4,'D'),{CHK:0.8,CRT:0.4}]),
+    S('q5','작품 속 역할이라면?', ['숨겨진 이야기 전달자',IMG(5,'A'),{NAR:0.6,EXP:0.5}],['자유로운 점·선',IMG(5,'B'),{CHK:0.6,EXP:0.4}],['조화로운 배치',IMG(5,'C'),{SPA:0.7,SOC:0.4}],['시선을 압도하는 색채',IMG(5,'D'),{COL:0.8}]),
+    S('q6','새 재료(찰흙 등)를 받았을 때?', ['손으로 감각 탐색',IMG(6,'A'),{CHK:0.6}],['구상·계획 후 제작',IMG(6,'B'),{CON:0.7,SPA:0.4}],['주변 참고',IMG(6,'C'),{SOC:0.6}],['질감/형태 세밀 탐색',IMG(6,'D'),{DET:0.6,OBS:0.6}]),
+    S('q7','‘현실에 없는 나만의 공간’을 그린다면?', ['가상의 존재 채우기',IMG(7,'A'),{NAR:0.6,EXP:0.5}],['현실과 다른 디테일',IMG(7,'B'),{DET:0.7,OBS:0.6}],['빛/그림자 분위기',IMG(7,'C'),{SPA:0.6,COL:0.5}],['안 써본 기법/재료 실험',IMG(7,'D'),{CHK:0.9}]),
+    S('q8','“잘 그렸다”의 가장 중요한 요소는?', ['정확한 형태/비례',IMG(8,'A'),{DET:0.8,OBS:0.5}],['독특한 아이디어',IMG(8,'B'),{CON:0.8,CHK:0.4}],['감정 움직임',IMG(8,'C'),{EXP:0.7,NAR:0.5}],['안정감 있는 구도',IMG(8,'D'),{SPA:0.8}]),
+    S('q9','3시간 대회, 1시간에 망쳤다고 느꼈다면?', ['처음부터 다시',IMG(9,'A'),{CHK:0.7}],['수정 후 끝까지',IMG(9,'B'),{GRT:0.8,DET:0.4}],['새 콘셉트 구상',IMG(9,'C'),{CON:0.7}],['주변 의견 요청',IMG(9,'D'),{SOC:0.6}]),
+    S('q10','부모님이 “이해하기 어렵다”라고 하면?', ['난해했나 속상',IMG(10,'A'),{CRT:0.4}],['감정을 못 알아줘서',IMG(10,'B'),{EXP:0.6}],['의도 전달법 고민',IMG(10,'C'),{NAR:0.6,SOC:0.5}],['독특해서 특별',IMG(10,'D'),{EXP:0.5}]),
+    S('q11','가장 흥미로운 직업은?', ['건축가',IMG(11,'A'),{SPA:0.8,CON:0.6}],['일러스트레이터',IMG(11,'B'),{NAR:0.6,DET:0.6}],['애니메이터',IMG(11,'C'),{EXP:0.6,NAR:0.6}],['조각가',IMG(11,'D'),{SPA:0.6,DET:0.6}]),
+    S('q12','평범한 신발을 비범하게 만든다면?', ['형태 해체·재조합',IMG(12,'A'),{CON:0.7,CHK:0.5}],['재질 극사실 묘사',IMG(12,'B'),{DET:0.9,OBS:0.5}],['색/무늬 장식',IMG(12,'C'),{COL:0.8}],['살아있는 듯 스토리',IMG(12,'D'),{NAR:0.7}]),
+    S('q13','미술관에서 가장 먼저 드는 생각?', ['얼마나 오래 걸렸을까',IMG(13,'A'),{GRT:0.6,DET:0.4}],['저 색 대신 다른 색',IMG(13,'B'),{COL:0.7,CRT:0.5}],['어떤 의도/스토리일까',IMG(13,'C'),{NAR:0.7,CON:0.6}],['화가의 삶은 어땠을까',IMG(13,'D'),{EXP:0.5,NAR:0.4}]),
+    S('q14','감정을 가장 잘 표현하는 요소는?', ['선 굵기/거친 질감',IMG(14,'A'),{DET:0.5}],['강렬/부드러운 색',IMG(14,'B'),{COL:0.7,EXP:0.5}],['표정',IMG(14,'C'),{NAR:0.6,EXP:0.6}],['분위기/구도',IMG(14,'D'),{SPA:0.6}]),
+    S('q15','1년 장기 프로젝트라면?', ['도시 디테일 기록',IMG(15,'A'),{OBS:0.6,GRT:0.6,DET:0.5}],['한 인물의 일생 연작',IMG(15,'B'),{NAR:0.7,GRT:0.6}],['새 재료 지속 실험',IMG(15,'C'),{CHK:0.7,GRT:0.5}],['심리 변화 시각화',IMG(15,'D'),{EXP:0.6,CON:0.6}]),
+    S('q16','가장 중요한 작품을 고르는 이유는?', ['강한 감동',IMG(16,'A'),{EXP:0.7}],['사회 메시지/새 아이디어',IMG(16,'B'),{CON:0.7,NAR:0.5}],['정교하고 사실적',IMG(16,'C'),{DET:0.8,OBS:0.6}],['색/형태가 매우 독특',IMG(16,'D'),{COL:0.7,CHK:0.6}]),
+    S('q17','“두려움”을 표현한다면?', ['복잡한 선/모양',IMG(17,'A'),{CHK:0.6,EXP:0.5}],['어둡고 차가운 색',IMG(17,'B'),{COL:0.6,EXP:0.5}],['숨은 인물/작게',IMG(17,'C'),{DET:0.5,NAR:0.5,OBS:0.5}],['나만의 상징',IMG(17,'D'),{EXP:0.6,CON:0.6}]),
+    S('q18','큰 작품에서 가장 힘든 점은?', ['계획과 달라짐',IMG(18,'A'),{CON:0.4,CRT:0.5}],['반복 수정',IMG(18,'B'),{DET:0.5,GRT:0.6}],['끝없이 느껴짐',IMG(18,'C'),{GRT:0.5}],['의도 이해 못할까 불안',IMG(18,'D'),{SOC:0.5,EXP:0.4}]),
+    S('q19','심사위원이라면 가장 높은 점수는?', ['기술 완벽·무실수',IMG(19,'A'),{DET:0.8,GRT:0.5,OBS:0.5}],['고정관념 깨는 충격',IMG(19,'B'),{CHK:0.7,CON:0.6}],['감동을 주는 작품',IMG(19,'C'),{EXP:0.7,NAR:0.6}],['여러 의미로 생각거리',IMG(19,'D'),{CON:0.6,NAR:0.5}]),
+    S('q20','보이지 않는 공기/소리/냄새를 표현한다면?', ['도형/선으로',IMG(20,'A'),{SPA:0.6,CON:0.5}],['맞는 색과 분위기',IMG(20,'B'),{COL:0.7,EXP:0.5}],['움직임·흐름 표현',IMG(20,'C'),{NAR:0.5,SPA:0.5}],['공간 채움 복잡하게',IMG(20,'D'),{DET:0.5,OBS:0.5,SPA:0.5}])
+  ];
+}
+
+/* —— 보안: 우클릭 방지 —— */
+document.addEventListener('contextmenu',function(e){e.preventDefault()},{capture:true});
+</script>
+</body>
+</html>
