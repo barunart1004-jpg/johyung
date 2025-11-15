@@ -381,7 +381,7 @@ function viewConsent(){
 /* 프로필 */
 const AGE_TO_GRADE={7:'초등학교 1학년',8:'초등학교 2학년',9:'초등학교 3학년',10:'초등학교 4학년',11:'초등학교 5학년',12:'초등학교 6학년'};
 const GRADE_TO_AGE=Object.fromEntries(Object.entries(AGE_TO_GRADE).map(([a,g])=>[g,a]));
-const CAMPUSES=['압구정[본원]','반포 캠퍼스','한남 캠퍼스','방배 캠퍼스','목동 캠퍼스','송파 캠퍼스','서대문 캠퍼스','일산 캠퍼스','탄현 캠퍼스','김포 캠퍼스','송도 캠퍼스','부산 캠퍼스'];
+const CAMPUSES=['압구정[본원]','반포 캠퍼스','한남 캠퍼스','방배 캠퍼스','목동 캠퍼스','송파 캠퍼스','서대문 캠퍼스','일산 캠퍼스','탄현 캠퍼스','김포 캠퍼스','송도 캠퍼스','부산 캠퍼스','분당 캠퍼스'];
 
 function viewProfile(){
   app().innerHTML=`<h2 class="center">프로필 정보</h2>
@@ -791,3 +791,4 @@ document.addEventListener('contextmenu',e=>e.preventDefault(),{capture:true});
 </script>
 </body>
 </html>
+
