@@ -1,5 +1,5 @@
 {
-  "name": "barunart-aptitude",
+  "name": "johyungart-aptitude",
   "private": true,
   "dependencies": {
     "resend": "^3.2.0"
